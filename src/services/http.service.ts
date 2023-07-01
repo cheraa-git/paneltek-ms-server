@@ -8,7 +8,8 @@ const http = axios.create({
   auth: {
     username: process.env.MS_USER || '',
     password: process.env.MS_PASSWORD || ''
-  }
+  },
+  // timeout: 10000
 })
 
 const httpService = {
