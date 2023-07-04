@@ -1,4 +1,4 @@
-import httpService from './http.service'
+import { msHttp } from './http.service'
 
 
 interface MsServicePayload {
@@ -9,9 +9,9 @@ interface MsServicePayload {
 export type MsServiceResponse = Promise<MsServicePayload>
 
 export const msService = {
-  getProcessingOrdersByDate: async (startDate: string, endDate: string): MsServiceResponse => { // date format: 2023-06-20 00:00:00
+  getProcessingOrdersByDate: async (startDate: string, endDate?: string): MsServiceResponse => { // date format: 2023-06-20 00:00:00
     try {
-      const response = await httpService.get(`/processingorder?filter=updated>=${startDate};updated<=${endDate};`)
+      const response = await msHttp.get(`/processingorder?filter=updated>=${startDate};${endDate ? 'updated<=' + endDate + ';' : ''}`)
       return { data: response.data }
     } catch (error) {
       return { error: { message: 'getProcessingOrdersByDate error', data: error } }
@@ -36,7 +36,7 @@ export const msService = {
   },
   getProcessingOrderPositionsRowsWithAssortment: async (processingOrderRow: any): MsServiceResponse => {
     try {
-      const products = (await httpService.get(processingOrderRow.positions.meta.href)).data.rows
+      const products = (await msHttp.get(processingOrderRow.positions.meta.href)).data.rows
       for (const i in products) {
         const assortmentRes = await msService.getAssortment(products[i].assortment.meta.href)
         if (assortmentRes.error || !assortmentRes.data) {
@@ -58,7 +58,7 @@ export const msService = {
   },
   getAssortment: async (href: string): MsServiceResponse => {
     try {
-      const response = await httpService.get(href)
+      const response = await msHttp.get(href)
       return { data: response.data }
     } catch (error) {
       return { error: { message: 'getRowAssortment error', data: error } }
@@ -66,7 +66,7 @@ export const msService = {
   },
   getUom: async (href: string): MsServiceResponse => {
     try {
-      const response = await httpService.get(href)
+      const response = await msHttp.get(href)
       return { data: response.data }
     } catch (error) {
       return { error: { message: 'getUom error', data: error } }
@@ -74,7 +74,7 @@ export const msService = {
   },
   getProductStock: async (id: string): MsServiceResponse => {
     try {
-      const response = await httpService.get(`assortment?filter=id=${id}`)
+      const response = await msHttp.get(`assortment?filter=id=${id}`)
       return { data: response.data.rows[0]?.stock || NaN }
     } catch (error) {
       return { error: { message: 'getPositionStock error', data: error } }

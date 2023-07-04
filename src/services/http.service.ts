@@ -3,21 +3,24 @@ import dotenv from 'dotenv'
 
 dotenv.config()
 
-const http = axios.create({
+export const msHttp = axios.create({
   baseURL: 'https://online.moysklad.ru/api/remap/1.2/entity',
   auth: {
     username: process.env.MS_USER || '',
     password: process.env.MS_PASSWORD || ''
-  },
+  }
   // timeout: 10000
 })
 
-const httpService = {
-  get: http.get,
-  post: http.post,
-  put: http.put,
-  delete: http.delete,
-  patch: http.patch
-}
+export const firebaseHttp = axios.create({
+  baseURL: 'https://paneltek-ms-default-rtdb.firebaseio.com'
+})
 
-export default httpService
+firebaseHttp.interceptors.request.use(config => {
+  config.url = config.url?.replace(/\/$/g, '') + '.json'
+  return config
+})
+
+
+
+
