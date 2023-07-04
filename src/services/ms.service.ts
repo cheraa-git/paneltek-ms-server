@@ -1,15 +1,9 @@
 import { msHttp } from './http.service'
+import { ServiceResponse } from '../types'
 
-
-interface MsServicePayload {
-  data?: any
-  error?: { message: string, data: any }
-}
-
-export type MsServiceResponse = Promise<MsServicePayload>
 
 export const msService = {
-  getProcessingOrdersByDate: async (startDate: string, endDate?: string): MsServiceResponse => { // date format: 2023-06-20 00:00:00
+  getProcessingOrdersByDate: async (startDate: string, endDate?: string): ServiceResponse => { // date format: 2023-06-20 00:00:00
     try {
       const response = await msHttp.get(`/processingorder?filter=updated>=${startDate};${endDate ? 'updated<=' + endDate + ';' : ''}`)
       return { data: response.data }
@@ -34,7 +28,7 @@ export const msService = {
     }
     return { positions: result, notReceivedOrders }
   },
-  getProcessingOrderPositionsRowsWithAssortment: async (processingOrderRow: any): MsServiceResponse => {
+  getProcessingOrderPositionsRowsWithAssortment: async (processingOrderRow: any): ServiceResponse => {
     try {
       const products = (await msHttp.get(processingOrderRow.positions.meta.href)).data.rows
       for (const i in products) {
@@ -56,7 +50,7 @@ export const msService = {
       return { error: { message: 'getProcessingOrderPositions error', data: error } }
     }
   },
-  getAssortment: async (href: string): MsServiceResponse => {
+  getAssortment: async (href: string): ServiceResponse => {
     try {
       const response = await msHttp.get(href)
       return { data: response.data }
@@ -64,7 +58,7 @@ export const msService = {
       return { error: { message: 'getRowAssortment error', data: error } }
     }
   },
-  getUom: async (href: string): MsServiceResponse => {
+  getUom: async (href: string): ServiceResponse => {
     try {
       const response = await msHttp.get(href)
       return { data: response.data }
@@ -72,7 +66,7 @@ export const msService = {
       return { error: { message: 'getUom error', data: error } }
     }
   },
-  getProductStock: async (id: string): MsServiceResponse => {
+  getProductStock: async (id: string): ServiceResponse => {
     try {
       const response = await msHttp.get(`assortment?filter=id=${id}`)
       return { data: response.data.rows[0]?.stock || NaN }

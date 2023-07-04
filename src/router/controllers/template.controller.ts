@@ -19,24 +19,30 @@ export class TemplateController {
     if (!start) return res.status(500).send({ message: 'param `start` is required' })
     const processingOrdersRes = await msService.getProcessingOrdersByDate(start, end)
     if (processingOrdersRes.error) return res.status(500).send(processingOrdersRes.error)
-    const newReport = await reportService.create({
+    if (processingOrdersRes.data.rows.length >= 1000) return res.status(500).send({ message: 'Максимальное количество обрабатываемых заказов на производство - 1000. Попробуйте выбрать другой диапазон' })
+    const newReportRes = await reportService.create({
       id: nanoid(),
       status: 'pending',
-      title: 'Заказы на производство',
+      title: `"Заказы на производство" с ${start} ${end ? 'по ' + end : ''}`,
       type: 'processing_order',
       createdAt: Date.now(),
       length: processingOrdersRes.data.rows.length
     })
-    res.send(newReport)
+    if (newReportRes.error || !newReportRes.data) return res.status(500).send(newReportRes.error)
+    res.send(newReportRes.data)
   }
 
   async getProcessingOrdersReport(req: Request, res: Response) {
     const { start, end, reportId } = req.query as Record<string, string>
     let resData: any[] = []
-
-    const processingOrdersRes = (await msService.getProcessingOrdersByDate(start, end))
+    if (!start || !reportId) {
+      await reportService.cancel(reportId)
+      return res.status(500).send({ message: 'params `start` adn `reportId` are required', reportId })
+    }
+    const processingOrdersRes = await msService.getProcessingOrdersByDate(start, end)
     if (processingOrdersRes.error || !processingOrdersRes.data) {
-      res.status(500).send(processingOrdersRes.error)
+      await reportService.cancel(reportId)
+      return res.status(500).send({ ...processingOrdersRes.error, reportId })
     }
     const processingOrders = processingOrdersRes.data.rows
     let { positions, notReceivedOrders } = await msService.getProcessingOrdersPositions(processingOrders)
@@ -61,8 +67,8 @@ export class TemplateController {
       let groupedPosIndex = 0
       let stockRes = await msService.getProductStock(groupedPositions[key][groupedPosIndex].assortment.id)
       if (stockRes.error) {
-        console.log(stockRes.error)
-        throw new Error('stockRes.error') // TODO: вместо этого отработать ошибку
+        await reportService.cancel(reportId)
+        return res.status(500).send({ ...stockRes.error, reportId })// TODO: вместо этого отработать ошибку
       }
       if (isNaN(stockRes.data) && groupedPositions[key].length > 1) {
         // TODO: stock равна NaN тогда, когда позиция в архиве. Нет смысла делать запрос, если позиция архивная, нужно сделать проверку на это прежде чем отправлять запрос.
@@ -72,6 +78,10 @@ export class TemplateController {
           const id = groupedPositions[key][groupedPosIndex]?.assortment?.id
           if (!id) continue
           stockRes = await msService.getProductStock(id)
+          if (stockRes.error) {
+            await reportService.cancel(reportId)
+            return res.status(500).send({ ...stockRes.error, reportId })
+          }
           if (isNaN(stockRes.data)) {
             groupedPosIndex++
           }
@@ -88,6 +98,13 @@ export class TemplateController {
       })
     }
 
+    resData.sort((a, b) => {
+      const positionNameA = a.positionName.toLowerCase()
+      const positionNameB = b.positionName.toLowerCase()
+      if (positionNameA < positionNameB) return -1
+      if (positionNameA > positionNameB) return 1
+      return 0
+    })
 
     const localFilePath = path.join(__dirname, 'template-processing-orders.xlsx')
     axios.get('/templates%2Ftemplate-processing-orders.xlsx?alt=media', {
@@ -124,14 +141,14 @@ export class TemplateController {
       .then((buffer) => {
         console.log('COMPLETED')
         storageService.save(buffer, 'Материалы заказов на производство.xlsx').then(url => {
-          reportService.complete(reportId, url).then(report => {
-            res.send(report)
+          reportService.complete(reportId, url).then(reportRes => {
+            if (reportRes.error || !reportRes.data) return res.status(500).send({ ...reportRes.error, reportId })
+            res.send(reportRes.data)
           })
         })
       })
       .catch((error) => {
-        console.error(error)
-        res.status(500).send('An error occurred')
+        return res.status(500).send({ ...error, reportId })
       })
 
   }

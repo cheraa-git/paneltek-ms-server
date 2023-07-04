@@ -11,3 +11,6 @@ export interface IReport {
   length?: number
 }
 
+
+export type ServiceResponse<DataType = any> = Promise<{ data?: DataType, error?: { message: string, data: any } }>
+
