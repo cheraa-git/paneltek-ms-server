@@ -7,7 +7,6 @@ import { Facing } from '../../utils/facing'
 
 export class CustomerOrderController {
   getCurrentOrders = async (req: Request, res: Response) => {
-
     let existingOrders: number[] = []
     try {
       if (req.query.existingOrders) {
@@ -97,8 +96,8 @@ export class CustomerOrderController {
         data.push(orderData)
       }
       console.log(`${+i + 1}/${ordersRes.data?.length}`)
-
     }
+    console.log(`COMPLETED ${new Date().toLocaleString()}`)
     res.json(data)
   }
 }
