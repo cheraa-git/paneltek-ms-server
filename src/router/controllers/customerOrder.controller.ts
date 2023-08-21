@@ -7,15 +7,6 @@ import { Facing } from '../../utils/facing'
 
 export class CustomerOrderController {
   getCurrentOrders = async (req: Request, res: Response) => {
-    // let existingOrders: number[] = []
-    // try {
-    //   if (req.query.existingOrders) {
-    //     existingOrders = req.query.existingOrders.split(',')
-    //   }
-    // } catch (error) {
-    //   console.log(req.query.existingOrders)
-    //   return res.status(500).json({ message: 'invalid params' })
-    // }
 
     const existingOrders: number[] = ((req.query.existingOrders as string | undefined) || '')
       .replaceAll('[', '')
@@ -86,7 +77,7 @@ export class CustomerOrderController {
         '№ заказа': order.name,
         'Дата заказа': order.moment.split(' ')[0].split('-').reverse().join('.'),
         'Дата запуска': startDate ? startDate.split(' ')[0].split('-').reverse().join('.') : '-',
-        'Дата отгрузки': order.deliveryPlannedMoment || '-',
+        'Дата отгрузки': order.deliveryPlannedMoment?.split(' ')[0].split('-').reverse().join('.') || '-',
         'Факт готовности': '',
         'Контрагент': agent.name || agent.legalTitle || '-',
         'Текущий статус': '',
@@ -106,7 +97,7 @@ export class CustomerOrderController {
       }
       console.log(`${+i + 1}/${ordersRes.data?.length}`)
     }
-    console.log(`COMPLETED ${new Date().toLocaleString()}`)
+    console.log(`COMPLETED ${new Date().toLocaleString()}; ADD - ${data.length}`)
     res.json(data)
   }
 }
