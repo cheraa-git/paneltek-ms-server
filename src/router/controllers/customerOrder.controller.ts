@@ -35,6 +35,7 @@ export class CustomerOrderController {
 
         if (!wallsWidth.includes(width)) wallsWidth.push(width)
         if (!wallsColorAndFiller.includes(wallColorAndFiller)) wallsColorAndFiller.push(wallColorAndFiller)
+        console.log(wall.name)
         wallsSquare += Panel.getWeight(wall.name) * wall.quantity
       })
 

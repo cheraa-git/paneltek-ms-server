@@ -106,7 +106,7 @@ export class Panel {
   }
 
   static getWeight(panelName: string): number {
-    const q = panelName.split(' 0,5х0,5х')?.at(-1)?.split('мм')?.at(0)?.split('х')
+    const q = panelName?.split(' 0,5х0,5х')?.at(-1)?.split('мм')?.at(0)?.split('х')
     if (!q) {
       console.error(`ERROR Panel getWeight: invalid panelName ${panelName}`)
       return 0
