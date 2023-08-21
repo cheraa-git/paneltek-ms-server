@@ -8,9 +8,11 @@ import { Facing } from '../../utils/facing'
 export class CustomerOrderController {
   getCurrentOrders = async (req: Request, res: Response) => {
 
-    let existingOrders: number[]
+    let existingOrders: number[] = []
     try {
-      existingOrders = JSON.parse(req.query.existingOrders as string).map((n: string) => Number(n))
+      if (req.query.existingOrders) {
+        existingOrders = JSON.parse(req.query.existingOrders as string).map((n: string) => Number(n))
+      }
     } catch (error) {
       return res.status(500).json({ message: 'invalid params' })
     }
