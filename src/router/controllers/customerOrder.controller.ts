@@ -7,11 +7,23 @@ import { Facing } from '../../utils/facing'
 
 export class CustomerOrderController {
   getCurrentOrders = async (req: Request, res: Response) => {
-    const ordersRes = await orderService.getOrdersByStatus(['Частично отгружено'])
+
+    let existingOrders: number[]
+    try {
+      existingOrders = JSON.parse(req.query.existingOrders as string).map((n: string) => Number(n))
+    } catch (error) {
+      return res.status(500).json({ message: 'invalid params' })
+    }
+
+
+    const ordersRes = await orderService.getOrdersByStatus(['Запуск в производство'])
     if (ordersRes.error) return res.status(500).json({ ...ordersRes.error })
     const data = []
+    ordersRes.data = ordersRes.data.filter((order: any) => !existingOrders.includes(Number(order.name)))
 
-    for (const order of ordersRes.data) {
+    for (const i in ordersRes.data) {
+      const order = ordersRes.data[i]
+
       const positionsRes = await orderService.getOrderAssortments(order.id)
       if (positionsRes.error) return res.status(500).json({ ...positionsRes.error })
 
@@ -35,7 +47,6 @@ export class CustomerOrderController {
 
         if (!wallsWidth.includes(width)) wallsWidth.push(width)
         if (!wallsColorAndFiller.includes(wallColorAndFiller)) wallsColorAndFiller.push(wallColorAndFiller)
-        console.log(wall.name)
         wallsSquare += Panel.getWeight(wall.name) * wall.quantity
       })
 
@@ -59,10 +70,12 @@ export class CustomerOrderController {
 
       const { data: agent } = await msHttp.get(order.agent.meta.href)
       const { data: project } = await msHttp.get(order.project.meta.href)
-      data.push({
+
+      const startDate = order.attributes.find((attribute: any) => attribute.name === 'Дата запуска')?.value
+      const orderData = {
         '№ заказа': order.name,
-        'Дата заказа': order.moment,
-        'Дата запуска': order.attributes.find((attribute: any) => attribute.name === 'Дата запуска')?.value || '-',
+        'Дата заказа': order.moment.split(' ')[0].split('-').reverse().join('.'),
+        'Дата запуска': startDate ? startDate.split(' ')[0].split('-').reverse().join('.') : '-',
         'Дата отгрузки': order.deliveryPlannedMoment || '-',
         'Факт готовности': '',
         'Контрагент': agent.name || agent.legalTitle || '-',
@@ -77,7 +90,12 @@ export class CustomerOrderController {
         'Ориентировочная дата выдачи на линию': '',
         'Проект': project.name || '-',
         'Примечание': ''
-      })
+      }
+      if (wallsSquare || roofsSquare || facingsSquare) {
+        data.push(orderData)
+      }
+      console.log(`${+i + 1}/${ordersRes.data?.length}`)
+
     }
     res.json(data)
   }
