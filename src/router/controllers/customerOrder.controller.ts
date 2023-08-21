@@ -13,6 +13,7 @@ export class CustomerOrderController {
         existingOrders = JSON.parse(req.query.existingOrders as string).map((n: string) => Number(n))
       }
     } catch (error) {
+      console.log(req.query.existingOrders)
       return res.status(500).json({ message: 'invalid params' })
     }
 
@@ -92,7 +93,7 @@ export class CustomerOrderController {
         'Проект': project.name || '-',
         'Примечание': ''
       }
-      if (wallsSquare || roofsSquare || facingsSquare) {
+      if (wallsSquare || roofsSquare) {
         data.push(orderData)
       }
       console.log(`${+i + 1}/${ordersRes.data?.length}`)
