@@ -4,4 +4,4 @@ import { Router } from 'express'
 const controller = new CustomerOrderController()
 export const customerOrderRouter = Router()
 
-customerOrderRouter.get('/current_orders', controller.getCurrentOrders)
+customerOrderRouter.post('/current_orders', controller.getCurrentOrders)

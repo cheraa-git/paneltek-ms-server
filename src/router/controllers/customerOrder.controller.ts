@@ -8,14 +8,10 @@ import { Facing } from '../../utils/facing'
 export class CustomerOrderController {
   getCurrentOrders = async (req: Request, res: Response) => {
 
-    const existingOrders: number[] = ((req.query.existingOrders as string | undefined) || '')
-      .replaceAll('[', '')
-      .replaceAll(']', '')
-      .replaceAll(' ', '')
-      .replaceAll('"', '')
-      .replaceAll('\'', '')
-      .split(',')
-      .map(n => Number(n))
+    if (req.body.existingOrders && !Array.isArray(req.body.existingOrders)) {
+      return res.status(500).json({ message: 'invalid params' })
+    }
+    const existingOrders: number[] = req.body.existingOrders?.map((n: string | number) => Number(n)) || []
 
     const ordersRes = await orderService.getOrdersByStatus(['Запуск в производство'])
     if (ordersRes.error) return res.status(500).json({ ...ordersRes.error })
