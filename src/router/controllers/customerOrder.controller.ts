@@ -20,7 +20,9 @@ export class CustomerOrderController {
     const ordersRes = await orderService.getOrdersByStatus(['Запуск в производство'])
     if (ordersRes.error) return res.status(500).json({ ...ordersRes.error })
     const data = []
-    ordersRes.data = ordersRes.data.filter((order: any) => !existingOrders.includes(Number(order.name)))
+    ordersRes.data = ordersRes.data.filter((order: any) => {
+      return !existingOrders.includes(Number(order.name)) && order.deliveryPlannedMoment
+    })
 
     for (const i in ordersRes.data) {
       const order = ordersRes.data[i]
