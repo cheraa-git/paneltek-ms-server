@@ -43,6 +43,8 @@ export class CustomerOrderController {
         let color = wall.characteristics?.find((c: any) => c.name = 'цвет')?.value
         if (color.split('/')[1] === '9003') {
           color = color.split('/')[0]
+        } else {
+          color = `(${color})`
         }
         const wallColorAndFiller = `${color} ${Panel.getFiller(wall.name)}`
 
