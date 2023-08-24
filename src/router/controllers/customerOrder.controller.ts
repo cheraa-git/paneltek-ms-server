@@ -72,14 +72,14 @@ export class CustomerOrderController {
       const { data: agent } = await msHttp.get(order.agent.meta.href)
       const { data: project } = await msHttp.get(order.project.meta.href)
 
-      const startDate = order.attributes.find((attribute: any) => attribute.name === 'Дата запуска')?.value
+      const startDate = order?.attributes?.find((attribute: any) => attribute.name === 'Дата запуска')?.value
       const orderData = {
         '№ заказа': order.name,
-        'Дата заказа': order.moment.split(' ')[0].split('-').reverse().join('.'),
+        'Дата заказа': order.moment?.split(' ')[0]?.split('-')?.reverse()?.join('.'),
         'Дата запуска': startDate ? startDate.split(' ')[0].split('-').reverse().join('.') : '-',
         'Дата отгрузки': order.deliveryPlannedMoment?.split(' ')[0].split('-').reverse().join('.') || '-',
         'Факт готовности': '',
-        'Контрагент': agent.name || agent.legalTitle || '-',
+        'Контрагент': agent?.name || agent?.legalTitle || '-',
         'Текущий статус': '',
         'Стена и ширина': walls.length ? `Стена ${wallsWidth.join('/')}` : '-',
         'Цвет, наполнение, Толщина': wallsColorAndFiller.join('/') || '-',
