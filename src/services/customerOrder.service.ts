@@ -1,5 +1,5 @@
 import { msHttp } from './http.service'
-import { ServiceResponse } from '../types'
+import { Order, OrderState, OrderStateName, ServiceResponse } from '../types'
 
 class CustomerOrderService {
   getOrderAssortments = async (orderId: string): ServiceResponse => {
@@ -27,8 +27,35 @@ class CustomerOrderService {
     } catch (error) {
       return { error: { message: 'CustomerOrderService.getOrdersByStatus error', data: error } }
     }
-
   }
+  getOrderStateDataByName = async (name: OrderStateName): ServiceResponse<OrderState> => {
+    try {
+      const { data: { states } } = await msHttp.get<{ states: OrderState[] }>('/customerorder/metadata/')
+      const state = states.find(s => s.name === name)
+      return { data: state }
+    } catch (error) {
+      return { error: { message: 'CustomerOrderService.getOrderStateDataByName error', data: error } }
+    }
+  }
+
+  getOrderByName = async (orderName: string): ServiceResponse<Order> => {
+    const { data: { rows } } = await msHttp.get<{ rows: Order[] }>('/customerorder', { params: { filter: `name=${orderName}` } })
+    const orders = rows.filter(o => !o.created.includes('2022-') && !o.created.includes('2021-'))
+    if (orders.length > 1) {
+      return { error: { message: 'CustomerOrderService.getOrderByName: founded more then one order', data: '' } }
+    }
+    return { data: orders[0] }
+  }
+
+  setOrderState = async (orderId: string, state: OrderState): ServiceResponse<Order> => {
+    try {
+      const { data } = await msHttp.put(`/customerorder/${orderId}`, { state })
+      return { data }
+    } catch (error) {
+      return { error: { message: 'CustomerOrderService.setOrderState error', data: error } }
+    }
+  }
+
 
 }
 

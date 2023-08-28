@@ -100,4 +100,23 @@ export class CustomerOrderController {
     console.log(`COMPLETED ${new Date().toLocaleString()}; ADD - ${data.length}`)
     res.json(data)
   }
+
+  setOrderState = async (req: Request, res: Response) => {
+    const { stateName, orderName } = req.body
+    const stateRes = await orderService.getOrderStateDataByName(stateName)
+    if (stateRes.error || !stateRes.data) return res.status(500).json({ ...stateRes.error })
+    const state = stateRes.data
+
+    const orderRes = await orderService.getOrderByName(orderName)
+    if (orderRes.error || !orderRes.data) return res.status(500).json({ ...orderRes.error })
+    const order = orderRes.data
+
+    const updatedOrderRes = await orderService.setOrderState(order.id, state)
+    if (updatedOrderRes.error) return res.status(500).json({ ...updatedOrderRes.error })
+    const updatedOrder = updatedOrderRes.data
+    if (!updatedOrder || updatedOrder?.state?.meta?.href !== state.meta.href) {
+      return res.status(500).json({ message: 'Unexpected error' })
+    }
+    res.json(updatedOrder)
+  }
 }

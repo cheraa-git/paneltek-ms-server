@@ -5,3 +5,4 @@ const controller = new CustomerOrderController()
 export const customerOrderRouter = Router()
 
 customerOrderRouter.post('/current_orders', controller.getCurrentOrders)
+customerOrderRouter.post('/state', controller.setOrderState)
