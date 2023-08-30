@@ -3,6 +3,7 @@ import { orderService } from '../../services/customerOrder.service'
 import { msHttp } from '../../services/http.service'
 import { Panel } from '../../utils/panel'
 import { Facing } from '../../utils/facing'
+import { formatNumber } from '../../utils/utils'
 
 
 export class CustomerOrderController {
@@ -102,10 +103,9 @@ export class CustomerOrderController {
   }
 
   setOrderState = async (req: Request, res: Response) => {
-    const { stateName, orderName } = req.body
-    const stateRes = await orderService.getOrderStateDataByName(stateName)
+    const orderName = formatNumber(Number(req.body.orderName), 5)
+    const stateRes = await orderService.getOrderStateDataByName(req.body.stateName)
     if (stateRes.error || !stateRes.data) {
-      console.log(stateRes)
       return res.status(500).json({ ...stateRes.error })
     }
     const state = stateRes.data
