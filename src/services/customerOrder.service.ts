@@ -32,6 +32,9 @@ class CustomerOrderService {
     try {
       const { data: { states } } = await msHttp.get<{ states: OrderState[] }>('/customerorder/metadata/')
       const state = states.find(s => s.name === name)
+      if (!state) {
+        return { error: { message: 'CustomerOrderService.getOrderStateDataByName: state not found', data: name } }
+      }
       return { data: state }
     } catch (error) {
       return { error: { message: 'CustomerOrderService.getOrderStateDataByName error', data: error } }
@@ -42,7 +45,7 @@ class CustomerOrderService {
     const { data: { rows } } = await msHttp.get<{ rows: Order[] }>('/customerorder', { params: { filter: `name=${orderName}` } })
     const orders = rows.filter(o => !o.created.includes('2022-') && !o.created.includes('2021-'))
     if (orders.length > 1) {
-      return { error: { message: 'CustomerOrderService.getOrderByName: founded more then one order', data: '' } }
+      return { error: { message: 'CustomerOrderService.getOrderByName: founded more then one order', data: orderName } }
     }
     return { data: orders[0] }
   }

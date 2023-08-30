@@ -104,7 +104,10 @@ export class CustomerOrderController {
   setOrderState = async (req: Request, res: Response) => {
     const { stateName, orderName } = req.body
     const stateRes = await orderService.getOrderStateDataByName(stateName)
-    if (stateRes.error || !stateRes.data) return res.status(500).json({ ...stateRes.error })
+    if (stateRes.error || !stateRes.data) {
+      console.log(stateRes)
+      return res.status(500).json({ ...stateRes.error })
+    }
     const state = stateRes.data
 
     const orderRes = await orderService.getOrderByName(orderName)
