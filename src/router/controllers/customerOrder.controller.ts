@@ -1,14 +1,12 @@
 import { Request, Response } from 'express'
 import { orderService } from '../../services/customerOrder.service'
 import { msHttp } from '../../services/http.service'
-import { Panel } from '../../utils/panel'
 import { Facing } from '../../utils/facing'
+import { Panel } from '../../utils/panel'
 import { formatNumber } from '../../utils/utils'
-
 
 export class CustomerOrderController {
   getCurrentOrders = async (req: Request, res: Response) => {
-
     if (req.body.existingOrders && !Array.isArray(req.body.existingOrders)) {
       return res.status(500).json({ message: 'invalid params' })
     }
@@ -39,7 +37,7 @@ export class CustomerOrderController {
       let wallsSquare = 0
       walls.forEach(wall => {
         const width = Panel.getWidth(wall.name)
-        let color = wall.characteristics?.find((c: any) => c.name = 'цвет')?.value
+        let color = wall.characteristics?.find((c: any) => (c.name = 'цвет'))?.value
         if (color.split('/')[1] === '9003') {
           color = color.split('/')[0]
         } else {
@@ -55,7 +53,7 @@ export class CustomerOrderController {
       const roofsColorAndFiller: string[] = []
       let roofsSquare = 0
       roofs.forEach(roof => {
-        let color = roof.characteristics?.find((c: any) => c.name = 'цвет')?.value
+        let color = roof.characteristics?.find((c: any) => (c.name = 'цвет'))?.value
         if (color.split('/')[1] === '9003') {
           color = color.split('/')[0]
         }
@@ -80,7 +78,7 @@ export class CustomerOrderController {
         'Дата запуска': startDate ? startDate.split(' ')[0].split('-').reverse().join('.') : '-',
         'Дата отгрузки': order.deliveryPlannedMoment?.split(' ')[0].split('-').reverse().join('.') || '-',
         'Факт готовности': '',
-        'Контрагент': agent?.name || agent?.legalTitle || '-',
+        Контрагент: agent?.name || agent?.legalTitle || '-',
         'Текущий статус': '',
         'Стена и ширина': walls.length ? `Стена ${wallsWidth.join('/')}` : '-',
         'Цвет, наполнение, Толщина': wallsColorAndFiller.join('/') || '-',
@@ -88,12 +86,12 @@ export class CustomerOrderController {
         'Кровля цвет наполнение толщина': roofs.length ? `Кровля ${roofsColorAndFiller.join('/')}` : '-',
         'Площадь кровли': roofsSquare,
         'Площадь фасонки': facingsSquare,
-        'Очередь': '',
+        Очередь: '',
         'Ориентировочная дата выдачи на линию': '',
-        'Проект': project.name || '-',
-        'Примечание': ''
+        Проект: project.name || '-',
+        Примечание: '',
       }
-      if (wallsSquare || roofsSquare) {
+      if (wallsSquare || roofsSquare || facingsSquare) {
         data.push(orderData)
       }
       console.log(`${+i + 1}/${ordersRes.data?.length}`)
