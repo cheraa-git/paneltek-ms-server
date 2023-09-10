@@ -13,6 +13,7 @@ const getPathStorageFromUrl = (url: string) => {
 }
 export const storageService = {
   save: async (file: ExcelJS.Buffer, dirName: string, fileName: string) => {
+    console.log(file)
     try {
       const storageRef = ref(storage, `${dirName}/${Date.now()}${fileName}`)
       const uploadTask = await uploadBytes(storageRef, file)
