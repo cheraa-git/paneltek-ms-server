@@ -7,6 +7,10 @@ export class FileController {
     const storageType = 'firebase'
     const dirName = 'test_dir'
     const fileName = 'testF_file_name'
+    console.log('FILE', file)
+    if (!file) {
+      return res.status(400).send('file is undefined')
+    }
    if (storageType === 'firebase') {
      const bufferFile = Buffer.from(file)
      const fileUrl = await storageService.save(bufferFile, dirName, fileName)
