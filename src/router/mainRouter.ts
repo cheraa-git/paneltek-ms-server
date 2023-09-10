@@ -11,5 +11,6 @@ export class MainRouter {
     this.app.use('/reports', reportRouter)
     this.app.use('/template', templateRouter)
     this.app.use('/customer_order', customerOrderRouter)
+    this.app.use('/file')
   }
 }

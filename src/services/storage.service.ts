@@ -12,9 +12,9 @@ const getPathStorageFromUrl = (url: string) => {
     .join('?')
 }
 export const storageService = {
-  save: async (file: ExcelJS.Buffer, name: string) => {
+  save: async (file: ExcelJS.Buffer, dirName: string, fileName: string) => {
     try {
-      const storageRef = ref(storage, `reports/${Date.now()}${name}`)
+      const storageRef = ref(storage, `${dirName}/${Date.now()}${fileName}`)
       const uploadTask = await uploadBytes(storageRef, file)
       return await getDownloadURL(uploadTask.ref)
     } catch (e) {

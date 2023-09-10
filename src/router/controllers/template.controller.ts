@@ -140,7 +140,7 @@ export class TemplateController {
       })
       .then((buffer) => {
         console.log('COMPLETED')
-        storageService.save(buffer, 'Материалы заказов на производство.xlsx').then(url => {
+        storageService.save(buffer, 'reports', 'Материалы заказов на производство.xlsx').then(url => {
           reportService.complete(reportId, url).then(reportRes => {
             if (reportRes.error || !reportRes.data) return res.status(500).send({ ...reportRes.error, reportId })
             res.send(reportRes.data)
