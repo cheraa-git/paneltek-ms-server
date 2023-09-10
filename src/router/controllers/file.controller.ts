@@ -8,7 +8,8 @@ export class FileController {
     const dirName = 'test_dir'
     const fileName = 'testF_file_name'
    if (storageType === 'firebase') {
-      const fileUrl = await storageService.save(file, dirName, fileName)
+     const bufferFile = Buffer.from(file)
+     const fileUrl = await storageService.save(bufferFile, dirName, fileName)
       res.send({url: fileUrl})
     } else {
       return res.status(400).send({ message: `invalid storage type - ${storageType}` })
