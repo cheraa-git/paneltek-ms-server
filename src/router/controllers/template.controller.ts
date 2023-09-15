@@ -1,5 +1,5 @@
 import { Request, Response } from 'express'
-import { msService } from '../../services/ms.service'
+import { processingOrderService } from '../../services/ms/processingOrder.service'
 import * as _ from 'lodash'
 import path from 'path'
 import axios from 'axios'
@@ -17,7 +17,7 @@ export class TemplateController {
     const start = req.query.start as string
     const end = req.query.end as string
     if (!start) return res.status(500).send({ message: 'param `start` is required' })
-    const processingOrdersRes = await msService.getProcessingOrdersByDate(start, end)
+    const processingOrdersRes = await processingOrderService.getProcessingOrdersByDate(start, end)
     if (processingOrdersRes.error) return res.status(500).send(processingOrdersRes.error)
     if (processingOrdersRes.data.rows.length >= 1000) return res.status(500).send({ message: 'Максимальное количество обрабатываемых заказов на производство - 1000. Попробуйте выбрать другой диапазон' })
     const newReportRes = await reportService.create({
@@ -39,16 +39,16 @@ export class TemplateController {
       await reportService.cancel(reportId)
       return res.status(500).send({ message: 'params `start` adn `reportId` are required', reportId })
     }
-    const processingOrdersRes = await msService.getProcessingOrdersByDate(start, end)
+    const processingOrdersRes = await processingOrderService.getProcessingOrdersByDate(start, end)
     if (processingOrdersRes.error || !processingOrdersRes.data) {
       await reportService.cancel(reportId)
       return res.status(500).send({ ...processingOrdersRes.error, reportId })
     }
     const processingOrders = processingOrdersRes.data.rows
-    let { positions, notReceivedOrders } = await msService.getProcessingOrdersPositions(processingOrders)
+    let { positions, notReceivedOrders } = await processingOrderService.getProcessingOrdersPositions(processingOrders)
     while (notReceivedOrders.length !== 0) {
       console.log(`notReceivedOrders length: ${notReceivedOrders.length}`)
-      const newPositions = await msService.getProcessingOrdersPositions(notReceivedOrders)
+      const newPositions = await processingOrderService.getProcessingOrdersPositions(notReceivedOrders)
       positions.push(newPositions.positions)
       notReceivedOrders = newPositions.notReceivedOrders
     }
@@ -65,7 +65,7 @@ export class TemplateController {
 
     for (const key of Object.keys(groupedPositions)) {
       let groupedPosIndex = 0
-      let stockRes = await msService.getProductStock(groupedPositions[key][groupedPosIndex].assortment.id)
+      let stockRes = await processingOrderService.getProductStock(groupedPositions[key][groupedPosIndex].assortment.id)
       if (stockRes.error) {
         await reportService.cancel(reportId)
         return res.status(500).send({ ...stockRes.error, reportId })// TODO: вместо этого отработать ошибку
@@ -77,7 +77,7 @@ export class TemplateController {
           console.log(`${groupedPositions[key][groupedPosIndex].assortment.id} ${groupedPositions[key][groupedPosIndex].assortment.name} - stock not found`)
           const id = groupedPositions[key][groupedPosIndex]?.assortment?.id
           if (!id) continue
-          stockRes = await msService.getProductStock(id)
+          stockRes = await processingOrderService.getProductStock(id)
           if (stockRes.error) {
             await reportService.cancel(reportId)
             return res.status(500).send({ ...stockRes.error, reportId })

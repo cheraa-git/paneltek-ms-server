@@ -1,8 +1,8 @@
-import { msHttp } from './http.service'
-import { ServiceResponse } from '../types'
+import { msHttp } from '../http.service'
+import { ServiceResponse } from '../../types'
 
 
-export const msService = {
+export const processingOrderService = {
   getProcessingOrdersByDate: async (startDate: string, endDate?: string): ServiceResponse => { // date format: 2023-06-20 00:00:00
     try {
       const response = await msHttp.get(`/processingorder?filter=updated>=${startDate};${endDate ? 'updated<=' + endDate + ';' : ''}`)
@@ -17,7 +17,7 @@ export const msService = {
     const result = []
     for (const order of orders) {
       count++
-      const positionsRowsRes = (await msService.getProcessingOrderPositionsRowsWithAssortment(order))
+      const positionsRowsRes = (await processingOrderService.getProcessingOrderPositionsRowsWithAssortment(order))
       if (positionsRowsRes.error || !positionsRowsRes.data) {
         console.log(positionsRowsRes.error)
         notReceivedOrders.push(order)
@@ -32,12 +32,12 @@ export const msService = {
     try {
       const products = (await msHttp.get(processingOrderRow.positions.meta.href)).data.rows
       for (const i in products) {
-        const assortmentRes = await msService.getAssortment(products[i].assortment.meta.href)
+        const assortmentRes = await processingOrderService.getAssortment(products[i].assortment.meta.href)
         if (assortmentRes.error || !assortmentRes.data) {
           return { error: assortmentRes.error }
         }
         const assortment = assortmentRes.data
-        const uomRes = await msService.getUom(assortment.uom.meta.href)
+        const uomRes = await processingOrderService.getUom(assortment.uom.meta.href)
         if (uomRes.error || !uomRes.data) {
           return { error: uomRes.error }
         }

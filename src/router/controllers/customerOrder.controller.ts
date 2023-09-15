@@ -1,5 +1,5 @@
 import { Request, Response } from 'express'
-import { orderService } from '../../services/customerOrder.service'
+import { orderService } from '../../services/ms/customerOrder.service'
 import { msHttp } from '../../services/http.service'
 import { Facing } from '../../utils/facing'
 import { Panel } from '../../utils/panel'

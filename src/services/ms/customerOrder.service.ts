@@ -1,5 +1,5 @@
-import { msHttp } from './http.service'
-import { Order, OrderState, OrderStateName, ServiceResponse } from '../types'
+import { msHttp } from '../http.service'
+import { Order, OrderState, OrderStateName, ServiceResponse } from '../../types'
 
 class CustomerOrderService {
   getOrderAssortments = async (orderId: string): ServiceResponse => {
