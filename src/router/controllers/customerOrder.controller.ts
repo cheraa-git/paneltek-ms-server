@@ -78,7 +78,7 @@ export class CustomerOrderController {
         'Дата запуска': startDate ? startDate.split(' ')[0].split('-').reverse().join('.') : '-',
         'Дата отгрузки': order.deliveryPlannedMoment?.split(' ')[0].split('-').reverse().join('.') || '-',
         'Факт готовности': '',
-        Контрагент: agent?.name || agent?.legalTitle || '-',
+        'Контрагент': agent?.name || agent?.legalTitle || '-',
         'Текущий статус': '',
         'Стена и ширина': walls.length ? `Стена ${wallsWidth.join('/')}` : '-',
         'Цвет, наполнение, Толщина': wallsColorAndFiller.join('/') || '-',
@@ -86,10 +86,10 @@ export class CustomerOrderController {
         'Кровля цвет наполнение толщина': roofs.length ? `Кровля ${roofsColorAndFiller.join('/')}` : '-',
         'Площадь кровли': roofsSquare,
         'Площадь фасонки': facingsSquare,
-        Очередь: '',
+        'Очередь': '',
         'Ориентировочная дата выдачи на линию': '',
-        Проект: project.name || '-',
-        Примечание: '',
+        'Проект': project.name || '-',
+        'Примечание': '',
       }
       if (wallsSquare || roofsSquare || facingsSquare) {
         data.push(orderData)
