@@ -3,7 +3,7 @@ import dotenv from 'dotenv'
 
 dotenv.config()
 
-export const msHttp = axios.create({
+export const msApi = axios.create({
   baseURL: 'https://online.moysklad.ru/api/remap/1.2/entity',
   auth: {
     username: process.env.MS_USER || '',

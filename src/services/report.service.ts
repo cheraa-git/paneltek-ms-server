@@ -1,5 +1,6 @@
 import { firebaseHttp } from './http.service'
-import { IReport, ServiceResponse } from '../types'
+import { ServiceResponse } from '../types/types'
+import { IReport } from '../types/report.types'
 
 export const reportService = {
   get: async (): ServiceResponse<IReport[]> => {

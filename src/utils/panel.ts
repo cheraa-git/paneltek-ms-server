@@ -1,11 +1,14 @@
+import { PanelType, PanelWidth } from '../types/product.types'
+
 export class Panel {
   name: string
   depth: string
-  type: string
-  width: string
+  type: PanelType
+  width: PanelWidth
   colors: [string, string]
   weight: number
   filler: string
+  isWall: boolean
 
   constructor(panelName: string) {
     if (!Panel.isPanel(panelName)) return
@@ -16,6 +19,7 @@ export class Panel {
     this.colors = Panel.getColors(panelName)
     this.weight = Panel.getWeight(panelName)
     this.filler = Panel.getFiller(panelName)
+    this.isWall = this.type.includes('стеновая')
   }
 
   static isPanel(productName: string) {
@@ -33,8 +37,7 @@ export class Panel {
     }
     const result = depthMatches[0].replace('(', '').replace(')', '').replace('мм', '')
     if (!result) {
-      console.log(`ERROR ${JSON.stringify(depthMatches)} getDepth: result incorrect. Length: ${depthMatches.length}`)
-      return ''
+      throw new Error(`Panel getDepth: result incorrect: ${JSON.stringify(depthMatches)}. Length: ${depthMatches.length}`)
     }
     return result
   }
@@ -43,10 +46,7 @@ export class Panel {
     const depth = Panel.getDepth(productName)
     if (productName.includes('ППС')) return `ППС ${depth}`
     else if (productName.includes('МВ')) return `МВ ${depth}`
-    else {
-      console.log('getFiller: invalid productName')
-      return ''
-    }
+    else throw new Error('Panel getFiller: invalid productName')
   }
 
   static getType(productName: string) {
@@ -59,8 +59,7 @@ export class Panel {
     } else if (productName.includes('кровельная МВ')) {
       return 'кровельная МВ'
     } else {
-      console.log(`ERROR getType ${productName} type not found`)
-      return ''
+      throw new Error(`Panel getType ${productName} type not found`)
     }
   }
 
@@ -70,8 +69,7 @@ export class Panel {
     } else if (productName.includes('х1200х')) {
       return '1200'
     } else {
-      console.log(`ERROR getPanelWidth: ${productName} width not found`)
-      return ''
+      throw new Error(`Panel getPanelWidth: ${productName} width not found`)
     }
   }
 
@@ -101,25 +99,20 @@ export class Panel {
       if (!color1 || !color2) throw new Error(`getColor:matches4 - color1: ${color1}, color2: ${color2}`)
       else return [color1, color2]
     }
-    console.log(`ERROR getColor:MatchesNotFound - ${panelName}`)
-    return ['', '']
+    throw new Error(`Panel getColor: MatchesNotFound - ${panelName}`)
   }
 
   static getWeight(panelName: string): number {
     const q = panelName?.split(' 0,5х0,5х')?.at(-1)?.split('мм')?.at(0)?.split('х')
     if (!q) {
-      console.error(`ERROR Panel getWeight: invalid panelName ${panelName}`)
-      return 0
+      throw new Error(`Panel getWeight: invalid panelName ${panelName}`)
     }
     const len = Number(q?.at(-1))
     const width = Number(q?.at(-2))
     const weight = len * width / 1000000
     if (!weight) {
-      console.error(`ERROR Panel getWeight: invalid weight ${panelName} - ${weight}`)
-      return 0
+      throw new Error(`Panel getWeight: invalid weight ${panelName} - ${weight}`)
     }
     return weight
   }
-
-
 }
