@@ -4,12 +4,14 @@ import dotenv from 'dotenv'
 dotenv.config()
 
 export const msApi = axios.create({
-  baseURL: 'https://online.moysklad.ru/api/remap/1.2/entity',
+  baseURL: 'https://api.moysklad.ru/api/remap/1.2/entity',
   auth: {
     username: process.env.MS_USER || '',
     password: process.env.MS_PASSWORD || ''
+  },
+  headers: {
+    'Accept-Encoding': 'gzip'
   }
-  // timeout: 10000
 })
 
 export const firebaseHttp = axios.create({

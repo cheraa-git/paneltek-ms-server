@@ -1,5 +1,9 @@
 import { msApi } from '../http.service'
 import { ServiceResponse } from '../../types/types'
+import { ProcessingPlan } from '../../types/processingPlan.types'
+import { ORGANIZATION_META, PROCESSING_ORDER_ATTR_ORDER_NUMB } from '../../constants/constants'
+import { ProcessingOrder } from '../../types/processingOrder.types'
+import { formatNumber } from '../../utils/utils'
 
 
 class ProcessingOrderService {
@@ -73,6 +77,40 @@ class ProcessingOrderService {
     } catch (error) {
       return { error: { message: 'getPositionStock error', data: error } }
     }
+  }
+
+  getByCustomerOrderNumb = async (orderNumber: string): Promise<ProcessingOrder[]> => {
+    const { data } = await msApi.get('/processingorder', {
+      params: {
+        filter: `${PROCESSING_ORDER_ATTR_ORDER_NUMB.meta.href}=${orderNumber}`
+      }
+    })
+    return data.rows
+  }
+
+  create = async (processingPlan: ProcessingPlan, quantity: number, orderNumber: string): Promise<ProcessingOrder> => {
+    const customerOrderProcessingOrders = await this.getByCustomerOrderNumb(formatNumber(Number(orderNumber), 5))
+    const existingProcessingOrder = customerOrderProcessingOrders.find(o => o.processingPlan.meta.href === processingPlan.meta.href)
+    if (existingProcessingOrder) {
+      return existingProcessingOrder
+    }
+    const materialsRes = await msApi.get(processingPlan.materials.meta.href)
+    const materials = materialsRes.data.rows.map((m: any) => ({
+      quantity: m.quantity * quantity,
+      assortment: m.assortment
+    }))
+    const data = {
+      organization: ORGANIZATION_META,
+      processingPlan: { meta: processingPlan.meta },
+      positions: materials,
+      quantity,
+      attributes: [{
+        ...PROCESSING_ORDER_ATTR_ORDER_NUMB,
+        value: orderNumber
+      }]
+    }
+    const response = await msApi.post('/processingorder', data)
+    return response.data
   }
 }
 

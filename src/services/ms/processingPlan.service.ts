@@ -15,7 +15,11 @@ import { PanelCalculator } from '../../utils/panelCalculator'
 import { Modification } from '../../types/product.types'
 
 
-type  CreateProcessingPlanRes = Promise<{ name: string, status: 'archived' | 'exists' | 'created' }>
+type  CreateProcessingPlanRes = Promise<{
+  name: string,
+  status: 'archived' | 'exists' | 'created',
+  processingPlan?: ProcessingPlan
+}>
 
 class ProcessingPlanService {
   private getProcessingPlanGroup = (productType: string) => {
@@ -39,7 +43,7 @@ class ProcessingPlanService {
     if (modification.archived) return { name: modification.name, status: 'archived' }
     const existingProcessingPlan = await this.getProcessingPlanByName(modification.name)
     if (existingProcessingPlan) {
-      return { name: modification.name, status: 'exists' }
+      return { name: modification.name, status: 'exists', processingPlan: existingProcessingPlan }
     }
     const facingName = modification.name
     const facing = new Facing(facingName)
@@ -62,8 +66,8 @@ class ProcessingPlanService {
       parent: PROCESSING_PLAN_GROUP_FACING,
       cost: (facing.weight * 120) * 100
     }
-    await msApi.post('/processingplan', processingPlanData)
-    return { name: modification.name, status: 'created' }
+    const { data: processingPlan } = await msApi.post('/processingplan', processingPlanData)
+    return { name: modification.name, status: 'created', processingPlan }
   }
 
   createPanelProcessingPlan = async (modification: Modification): CreateProcessingPlanRes => {
@@ -72,7 +76,7 @@ class ProcessingPlanService {
     }
     const existingProcessingPlan = await this.getProcessingPlanByName(modification.name)
     if (existingProcessingPlan) {
-      return { name: modification.name, status: 'exists' }
+      return { name: modification.name, status: 'exists', processingPlan: existingProcessingPlan }
     }
 
     const panelName = modification.name
@@ -114,8 +118,8 @@ class ProcessingPlanService {
       parent: this.getProcessingPlanGroup(panel.type),
       cost: (panel.weight * 200) * 100
     }
-    await msApi.post('/processingplan', processingPlanData)
-    return { name: modification.name, status: 'created' }
+    const { data: processingPlan } = await msApi.post('/processingplan', processingPlanData)
+    return { name: modification.name, status: 'created', processingPlan }
   }
 }
 

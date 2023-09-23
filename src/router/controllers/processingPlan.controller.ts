@@ -3,6 +3,7 @@ import { orderService } from '../../services/ms/customerOrder.service'
 import { Panel } from '../../utils/panel'
 import { processingPlanService } from '../../services/ms/processingPlan.service'
 import { Facing } from '../../utils/facing'
+import { isAxiosError } from 'axios'
 
 export class ProcessingPlanController {
   createProcessingPlanForOrder = async (req: Request, res: Response) => {
@@ -12,19 +13,24 @@ export class ProcessingPlanController {
     }
     try {
       const result = []
-      const modifications = await orderService.getOrderAssortments(orderId)
-      for (let modification of modifications) {
-        if (Panel.isPanel(modification.name)) {
-          const panelRes = await processingPlanService.createPanelProcessingPlan(modification)
+      const orderPositions = await orderService.getOrderAssortments(orderId)
+      for (let orderPosition of orderPositions) {
+        if (Panel.isPanel(orderPosition.assortment.name)) {
+          const panelRes = await processingPlanService.createPanelProcessingPlan(orderPosition.assortment)
           result.push(panelRes)
-        } else if (Facing.isFacing(modification.name)) {
-          const facingRes = await processingPlanService.createFacingProcessingPlan(modification)
+        } else if (Facing.isFacing(orderPosition.assortment.name)) {
+          const facingRes = await processingPlanService.createFacingProcessingPlan(orderPosition.assortment)
           result.push(facingRes)
         }
       }
       res.json(result)
     } catch (error) {
-      console.log(error)
+
+      if (isAxiosError(error)) {
+        console.log(error.response?.data)
+      } else {
+        console.log(error)
+      }
       res.status(500).json(error)
     }
   }

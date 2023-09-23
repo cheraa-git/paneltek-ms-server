@@ -4,6 +4,9 @@ import { msApi } from '../../services/http.service'
 import { Facing } from '../../utils/facing'
 import { Panel } from '../../utils/panel'
 import { formatNumber } from '../../utils/utils'
+import { ProcessingPlan } from '../../types/processingPlan.types'
+import { processingPlanService } from '../../services/ms/processingPlan.service'
+import { processingOrderService } from '../../services/ms/processingOrder.service'
 
 export class CustomerOrderController {
   getCurrentOrders = async (req: Request, res: Response) => {
@@ -23,13 +26,13 @@ export class CustomerOrderController {
       for (const i in ordersRes.data) {
         const order = ordersRes.data[i]
 
-        const modifications = await orderService.getOrderAssortments(order.id)
+        const orderPositions = await orderService.getOrderAssortments(order.id)
 
         const [walls, roofs, facings]: [any[], any[], any[]] = [[], [], []]
-        modifications.forEach((position: any) => {
-          if (position.name.includes('Сэндвич-панель стеновая')) walls.push(position)
-          else if (position.name.includes('Сэндвич-панель кровельная')) roofs.push(position)
-          else if (position.name.includes('Фасонное изделие')) facings.push(position)
+        orderPositions.forEach(({ assortment }) => {
+          if (assortment.name.includes('Сэндвич-панель стеновая')) walls.push(assortment)
+          else if (assortment.name.includes('Сэндвич-панель кровельная')) roofs.push(assortment)
+          else if (assortment.name.includes('Фасонное изделие')) facings.push(assortment)
         })
 
         const wallsWidth: string[] = []
@@ -105,23 +108,54 @@ export class CustomerOrderController {
   }
 
   setOrderState = async (req: Request, res: Response) => {
-    const orderName = formatNumber(Number(req.body.orderName), 5)
-    const stateRes = await orderService.getOrderStateDataByName(req.body.stateName)
-    if (stateRes.error || !stateRes.data) {
-      return res.status(500).json({ ...stateRes.error })
-    }
-    const state = stateRes.data
+    try {
+      const orderName = formatNumber(Number(req.body.orderName), 5)
+      const stateRes = await orderService.getOrderStateDataByName(req.body.stateName)
+      if (stateRes.error || !stateRes.data) {
+        return res.status(500).json({ ...stateRes.error })
+      }
+      const state = stateRes.data
 
-    const orderRes = await orderService.getOrderByName(orderName)
-    if (orderRes.error || !orderRes.data) return res.status(500).json({ ...orderRes.error })
-    const order = orderRes.data
+      const order = await orderService.getOrderByName(orderName)
 
-    const updatedOrderRes = await orderService.setOrderState(order.id, state)
-    if (updatedOrderRes.error) return res.status(500).json({ ...updatedOrderRes.error })
-    const updatedOrder = updatedOrderRes.data
-    if (!updatedOrder || updatedOrder?.state?.meta?.href !== state.meta.href) {
-      return res.status(500).json({ message: 'Unexpected error' })
+      const updatedOrderRes = await orderService.setOrderState(order.id, state)
+      if (updatedOrderRes.error) return res.status(500).json({ ...updatedOrderRes.error })
+      const updatedOrder = updatedOrderRes.data
+      if (!updatedOrder || updatedOrder?.state?.meta?.href !== state.meta.href) {
+
+      }
+      res.json(updatedOrder)
+    } catch (error: any) {
+      return res.status(500).json({ message: error.message })
     }
-    res.json(updatedOrder)
+  }
+
+  runOrder = async (req: Request, res: Response) => {
+    try {
+      const { orderName } = req.body
+      if (!orderName) return res.status(400).json({ message: 'param `orderName` is required' })
+
+      const order = await orderService.getOrderByName(formatNumber(orderName, 5))
+      const orderPositions = await orderService.getOrderAssortments(order.id)
+
+      const createdProcessingOrders = []
+      for (const position of orderPositions) {
+        let processingPlan: ProcessingPlan | undefined
+        if (Panel.isPanel(position.assortment.name)) {
+          processingPlan = (await processingPlanService.createPanelProcessingPlan(position.assortment)).processingPlan
+        } else if (Facing.isFacing(position.assortment.name)) {
+          processingPlan = (await processingPlanService.createFacingProcessingPlan(position.assortment)).processingPlan
+        }
+        if (processingPlan) {
+          const newProcessingOrder = await processingOrderService.create(processingPlan, position.quantity, order.name)
+          createdProcessingOrders.push(newProcessingOrder)
+        }
+      }
+
+      res.json(createdProcessingOrders)
+    } catch (error: any) {
+      console.log(error)
+      res.status(500).json({ message: error.message })
+    }
   }
 }

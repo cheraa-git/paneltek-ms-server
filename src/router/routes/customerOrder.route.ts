@@ -6,3 +6,4 @@ export const customerOrderRouter = Router()
 
 customerOrderRouter.post('/current_orders', controller.getCurrentOrders)
 customerOrderRouter.post('/state', controller.setOrderState)
+customerOrderRouter.post('/run', controller.runOrder)

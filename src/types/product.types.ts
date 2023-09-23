@@ -19,3 +19,17 @@ export interface Modification {
   characteristics: { meta: Meta, id: string, name: string, value: string }[]
   product: { meta: Meta }
 }
+
+export interface OrderPositionWithAssortment {
+  meta: Meta,
+  id: string
+  accountId: string
+  quantity: number
+  price: number
+  discount: number
+  vat: number
+  vatEnabled: boolean
+  assortment: Modification
+  shipped: number
+  reserve: number
+}
