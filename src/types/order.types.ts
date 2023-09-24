@@ -1,4 +1,4 @@
-import { Meta } from './types'
+import { Attribute, Meta } from './types'
 
 export interface OrderPositionsMeta {
   'href': string
@@ -65,7 +65,7 @@ export interface Order {
   'moment': string
   'sum': number
   'store': Pick<OrderStore, 'meta'>
-  'project': Pick<OrderProject, 'meta'>
+  'project'?: Pick<OrderProject, 'meta'>
   'agent': Pick<OrderAgent, 'meta'>
   'organization': Pick<OrderOrganization, 'meta'>
   'state': Pick<OrderState, 'meta'>
@@ -76,4 +76,6 @@ export interface Order {
     'meta': OrderPositionsMeta
   },
   'shipmentAddress': string
+  attributes?: Attribute[]
+  deliveryPlannedMoment?: string
 }

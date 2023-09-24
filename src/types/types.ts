@@ -9,4 +9,12 @@ export interface Meta {
   mediaType: string
 }
 
+export interface Attribute {
+  meta: Meta
+  id: string
+  name: string
+  type: string
+  value: string
+}
+
 

@@ -16,15 +16,13 @@ export class CustomerOrderController {
       }
       const existingOrders: number[] = req.body.existingOrders?.map((n: string | number) => Number(n)) || []
 
-      const ordersRes = await orderService.getOrdersByStatus(['Запуск в производство'])
-      if (ordersRes.error) return res.status(500).json({ ...ordersRes.error })
-      const data = []
-      ordersRes.data = ordersRes.data.filter((order: any) => {
+      const orders = (await orderService.getOrdersByStatus(['Запуск в производство'])).filter((order: any) => {
         return !existingOrders.includes(Number(order.name)) && order.deliveryPlannedMoment
       })
+      const data = []
 
-      for (const i in ordersRes.data) {
-        const order = ordersRes.data[i]
+      for (const i in orders) {
+        const order = orders[i]
 
         const orderPositions = await orderService.getOrderAssortments(order.id)
 
@@ -70,9 +68,10 @@ export class CustomerOrderController {
         facings.forEach(facing => {
           facingsSquare += Facing.getWeight(facing.name) * facing.quantity
         })
+        console.log('ORDER', order.project)
 
         const { data: agent } = await msApi.get(order.agent.meta.href)
-        const { data: project } = await msApi.get(order.project.meta.href)
+        const project = order.project ? (await msApi.get(order.project.meta.href)).data : ''
 
         const startDate = order?.attributes?.find((attribute: any) => attribute.name === 'Дата запуска')?.value
         const orderData = {
@@ -97,11 +96,12 @@ export class CustomerOrderController {
         if (wallsSquare || roofsSquare || facingsSquare) {
           data.push(orderData)
         }
-        console.log(`${+i + 1}/${ordersRes.data?.length}`)
+        console.log(`${+i + 1}/${orders?.length}`)
       }
       console.log(`COMPLETED ${new Date().toLocaleString()}; ADD - ${data.length}`)
       res.json(data)
     } catch (error) {
+      console.log(error)
       res.status(500).json({ message: 'Unexpected error', data: error })
     }
 
@@ -159,3 +159,5 @@ export class CustomerOrderController {
     }
   }
 }
+
+

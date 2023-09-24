@@ -14,17 +14,13 @@ class CustomerOrderService {
     return rows
   }
 
-  getOrdersByStatus = async (statuses: string[]): ServiceResponse => {
-    try {
-      const { data } = await msApi.get('/customerorder', {
-        params: {
-          filter: `state.name=${statuses.join(',')}`
-        }
-      })
-      return { data: data.rows }
-    } catch (error) {
-      return { error: { message: 'CustomerOrderService.getOrdersByStatus error', data: error } }
-    }
+  getOrdersByStatus = async (statuses: string[]): Promise<Order[]> => {
+    const { data } = await msApi.get('/customerorder', {
+      params: {
+        filter: `state.name=${statuses.join(',')}`
+      }
+    })
+    return data.rows
   }
   getOrderStateDataByName = async (name: OrderStateName): ServiceResponse<OrderState> => {
     try {

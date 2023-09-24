@@ -1,4 +1,4 @@
-import { Meta } from './types'
+import { Attribute, Meta } from './types'
 
 export interface ProcessingOrder {
   meta: Meta
@@ -8,7 +8,7 @@ export interface ProcessingOrder {
   name: string
   moment: string
   organization: { meta: Meta }
-  attributes?: { meta: Meta, id: string, name: string, type: string, value: string }[]
+  attributes?: Attribute[]
   positions: { meta: Meta }
   quantity: number
   processingPlan: { meta: Meta }
