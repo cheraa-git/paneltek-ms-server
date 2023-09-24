@@ -7,6 +7,7 @@ import { formatNumber } from '../../utils/utils'
 import { ProcessingPlan } from '../../types/processingPlan.types'
 import { processingPlanService } from '../../services/ms/processingPlan.service'
 import { processingOrderService } from '../../services/ms/processingOrder.service'
+import { OrderPositionWithAssortment } from '../../types/product.types'
 
 export class CustomerOrderController {
   getCurrentOrders = async (req: Request, res: Response) => {
@@ -16,7 +17,7 @@ export class CustomerOrderController {
       }
       const existingOrders: number[] = req.body.existingOrders?.map((n: string | number) => Number(n)) || []
 
-      const orders = (await orderService.getOrdersByStatus(['Запуск в производство'])).filter((order: any) => {
+      const orders = (await orderService.getOrdersByStatus(['Запуск в производство'])).filter((order) => {
         return !existingOrders.includes(Number(order.name)) && order.deliveryPlannedMoment
       })
       const data = []
@@ -26,54 +27,55 @@ export class CustomerOrderController {
 
         const orderPositions = await orderService.getOrderAssortments(order.id)
 
-        const [walls, roofs, facings]: [any[], any[], any[]] = [[], [], []]
-        orderPositions.forEach(({ assortment }) => {
-          if (assortment.name.includes('Сэндвич-панель стеновая')) walls.push(assortment)
-          else if (assortment.name.includes('Сэндвич-панель кровельная')) roofs.push(assortment)
-          else if (assortment.name.includes('Фасонное изделие')) facings.push(assortment)
+        const [walls, roofs, facings]: OrderPositionWithAssortment[][] = [[], [], []]
+        orderPositions.forEach((position) => {
+          console.log('POSITION', position)
+          if (position.assortment.name.includes('Сэндвич-панель стеновая')) walls.push(position)
+          else if (position.assortment.name.includes('Сэндвич-панель кровельная')) roofs.push(position)
+          else if (position.assortment.name.includes('Фасонное изделие')) facings.push(position)
         })
 
         const wallsWidth: string[] = []
         const wallsColorAndFiller: string[] = []
         let wallsSquare = 0
         walls.forEach(wall => {
-          const width = Panel.getWidth(wall.name)
-          let color = wall.characteristics?.find((c: any) => (c.name = 'цвет'))?.value
-          if (color.split('/')[1] === '9003') {
+          const width = Panel.getWidth(wall.assortment.name)
+          let color = wall.assortment.characteristics?.find(c => (c.name = 'цвет'))?.value
+          if (color?.split('/')[1] === '9003') {
             color = color.split('/')[0]
           } else {
             color = `(${color})`
           }
-          const wallColorAndFiller = `${color} ${Panel.getFiller(wall.name)}`
+          const wallColorAndFiller = `${color} ${Panel.getFiller(wall.assortment.name)}`
 
           if (!wallsWidth.includes(width)) wallsWidth.push(width)
           if (!wallsColorAndFiller.includes(wallColorAndFiller)) wallsColorAndFiller.push(wallColorAndFiller)
-          wallsSquare += Panel.getWeight(wall.name) * wall.quantity
+          console.log('AAAAAA', wall.assortment.name, '----', wall.quantity, '----', Panel.getWeight(wall.assortment.name))
+          wallsSquare += Panel.getWeight(wall.assortment.name) * wall.quantity
         })
 
         const roofsColorAndFiller: string[] = []
         let roofsSquare = 0
         roofs.forEach(roof => {
-          let color = roof.characteristics?.find((c: any) => (c.name = 'цвет'))?.value
-          if (color.split('/')[1] === '9003') {
+          let color = roof.assortment.characteristics?.find(c => (c.name = 'цвет'))?.value
+          if (color?.split('/')[1] === '9003') {
             color = color.split('/')[0]
           }
-          const roofColorAndFiller = `${color} ${Panel.getFiller(roof.name)}`
+          const roofColorAndFiller = `${color} ${Panel.getFiller(roof.assortment.name)}`
 
           if (!roofsColorAndFiller.includes(roofColorAndFiller)) roofsColorAndFiller.push(roofColorAndFiller)
-          roofsSquare += Panel.getWeight(roof.name) * roof.quantity
+          roofsSquare += Panel.getWeight(roof.assortment.name) * roof.quantity
         })
 
         let facingsSquare = 0
         facings.forEach(facing => {
-          facingsSquare += Facing.getWeight(facing.name) * facing.quantity
+          facingsSquare += Facing.getWeight(facing.assortment.name) * facing.quantity
         })
-        console.log('ORDER', order.project)
 
         const { data: agent } = await msApi.get(order.agent.meta.href)
         const project = order.project ? (await msApi.get(order.project.meta.href)).data : ''
 
-        const startDate = order?.attributes?.find((attribute: any) => attribute.name === 'Дата запуска')?.value
+        const startDate = order?.attributes?.find(attribute => attribute.name === 'Дата запуска')?.value
         const orderData = {
           '№ заказа': order.name,
           'Дата заказа': order.moment?.split(' ')[0]?.split('-')?.reverse()?.join('.'),
@@ -93,6 +95,7 @@ export class CustomerOrderController {
           'Проект': project.name || '-',
           'Примечание': ''
         }
+        console.log('SQUARE', { wallsSquare, roofsSquare, facingsSquare })
         if (wallsSquare || roofsSquare || facingsSquare) {
           data.push(orderData)
         }
