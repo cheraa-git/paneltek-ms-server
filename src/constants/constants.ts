@@ -8,10 +8,31 @@ export const ORGANIZATION_META = {
   }
 }
 
-export const PROCESSING_ORDER_ATTR_ORDER_NUMB = {
+export const PROCESSING_ORDER_ATTR_ORDER_NUMB_META = {
   'meta': {
     'href': 'https://api.moysklad.ru/api/remap/1.2/entity/processingorder/metadata/attributes/dee40f99-5654-11ee-0a80-0b4000010eb7',
     'type': 'attributemetadata',
     'mediaType': 'application/json'
   }
 }
+
+export const FINISHED_PRODUCT_STORE_META = {
+  'meta': {
+    'href': 'https://api.moysklad.ru/api/remap/1.2/entity/store/ae5628d1-bdf9-11eb-0a80-06eb0006f4d6',
+    'metadataHref': 'https://api.moysklad.ru/api/remap/1.2/entity/store/metadata',
+    'type': 'store',
+    'mediaType': 'application/json',
+    'uuidHref': 'https://online.moysklad.ru/app/#warehouse/edit?id=ae5628d1-bdf9-11eb-0a80-06eb0006f4d6'
+  }
+}
+
+export const MATERIALS_STORE_META = {
+  'meta': {
+    'href': 'https://api.moysklad.ru/api/remap/1.2/entity/store/b22a373b-bdf9-11eb-0a80-04f30006d775',
+    'metadataHref': 'https://api.moysklad.ru/api/remap/1.2/entity/store/metadata',
+    'type': 'store',
+    'mediaType': 'application/json',
+    'uuidHref': 'https://online.moysklad.ru/app/#warehouse/edit?id=b22a373b-bdf9-11eb-0a80-04f30006d775'
+  }
+}
+

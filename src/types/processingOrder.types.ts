@@ -1,4 +1,5 @@
 import { Attribute, Meta } from './types'
+import { Processing } from './processing.types'
 
 export interface ProcessingOrder {
   meta: Meta
@@ -12,4 +13,5 @@ export interface ProcessingOrder {
   positions: { meta: Meta }
   quantity: number
   processingPlan: { meta: Meta }
+  processings?: Processing[]
 }

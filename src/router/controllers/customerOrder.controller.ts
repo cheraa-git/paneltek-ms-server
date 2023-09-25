@@ -8,6 +8,8 @@ import { ProcessingPlan } from '../../types/processingPlan.types'
 import { processingPlanService } from '../../services/ms/processingPlan.service'
 import { processingOrderService } from '../../services/ms/processingOrder.service'
 import { OrderPositionWithAssortment } from '../../types/product.types'
+import { emailService } from '../../services/email.service'
+import { processingService } from '../../services/ms/processing.service'
 
 export class CustomerOrderController {
   getCurrentOrders = async (req: Request, res: Response) => {
@@ -142,6 +144,8 @@ export class CustomerOrderController {
       const orderPositions = await orderService.getOrderAssortments(order.id)
 
       const createdProcessingOrders = []
+      const createdProcessing = []
+      const failedProcessing = []
       for (const position of orderPositions) {
         let processingPlan: ProcessingPlan | undefined
         if (Panel.isPanel(position.assortment.name)) {
@@ -152,10 +156,23 @@ export class CustomerOrderController {
         if (processingPlan) {
           const newProcessingOrder = await processingOrderService.create(processingPlan, position.quantity, order.name)
           createdProcessingOrders.push(newProcessingOrder)
+          const newProcessingRes = await processingService.create(processingPlan, newProcessingOrder)
+          if (newProcessingRes.status === 'success') {
+            createdProcessing.push(newProcessingRes.data)
+          } else if (newProcessingRes.status === 'error') {
+            failedProcessing.push(newProcessingRes.data)
+          }
         }
       }
-
-      res.json(createdProcessingOrders)
+      if (failedProcessing.length !== 0) {
+        const emailMessage = `
+        Заказ покупателя: ${orderName}
+        Заказы на производство:
+        ${failedProcessing.map(p => `https://online.moysklad.ru/app/#processingorder/edit?id=${p.processingOrder.id}`).join('\n')}
+        `
+        await emailService.sendMessage(process.env.ADMIN_EMAIL || '', 'Ошибка техоперации', emailMessage)
+      }
+      res.json({ processingOrders: createdProcessingOrders, processing: createdProcessing })
     } catch (error: any) {
       console.log(error)
       res.status(500).json({ message: error.message })

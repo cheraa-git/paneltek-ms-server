@@ -1,7 +1,7 @@
 import { msApi } from '../http.service'
 import { ServiceResponse } from '../../types/types'
 import { ProcessingPlan } from '../../types/processingPlan.types'
-import { ORGANIZATION_META, PROCESSING_ORDER_ATTR_ORDER_NUMB } from '../../constants/constants'
+import { ORGANIZATION_META, PROCESSING_ORDER_ATTR_ORDER_NUMB_META } from '../../constants/constants'
 import { ProcessingOrder } from '../../types/processingOrder.types'
 import { formatNumber } from '../../utils/utils'
 
@@ -23,7 +23,6 @@ class ProcessingOrderService {
       count++
       const positionsRowsRes = (await this.getProcessingOrderPositionsRowsWithAssortment(order))
       if (positionsRowsRes.error || !positionsRowsRes.data) {
-        console.log(positionsRowsRes.error)
         notReceivedOrders.push(order)
         continue
       }
@@ -82,7 +81,7 @@ class ProcessingOrderService {
   getByCustomerOrderNumb = async (orderNumber: string): Promise<ProcessingOrder[]> => {
     const { data } = await msApi.get('/processingorder', {
       params: {
-        filter: `${PROCESSING_ORDER_ATTR_ORDER_NUMB.meta.href}=${orderNumber}`
+        filter: `${PROCESSING_ORDER_ATTR_ORDER_NUMB_META.meta.href}=${orderNumber}`
       }
     })
     return data.rows
@@ -105,7 +104,7 @@ class ProcessingOrderService {
       positions: materials,
       quantity,
       attributes: [{
-        ...PROCESSING_ORDER_ATTR_ORDER_NUMB,
+        ...PROCESSING_ORDER_ATTR_ORDER_NUMB_META,
         value: orderNumber
       }]
     }

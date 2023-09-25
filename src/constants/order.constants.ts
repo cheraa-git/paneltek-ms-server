@@ -33,3 +33,5 @@ export const ACTIVE_STATUSES = [
     'name': 'Частично отгружено'
   }
 ]
+
+export const RELEASE_STATUS_ATTR_ID = 'a2262c7f-d21f-11ed-0a80-012400380448'
