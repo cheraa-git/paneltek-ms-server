@@ -31,7 +31,6 @@ export class CustomerOrderController {
 
         const [walls, roofs, facings]: OrderPositionWithAssortment[][] = [[], [], []]
         orderPositions.forEach((position) => {
-          console.log('POSITION', position)
           if (position.assortment.name.includes('Сэндвич-панель стеновая')) walls.push(position)
           else if (position.assortment.name.includes('Сэндвич-панель кровельная')) roofs.push(position)
           else if (position.assortment.name.includes('Фасонное изделие')) facings.push(position)
@@ -52,7 +51,6 @@ export class CustomerOrderController {
 
           if (!wallsWidth.includes(width)) wallsWidth.push(width)
           if (!wallsColorAndFiller.includes(wallColorAndFiller)) wallsColorAndFiller.push(wallColorAndFiller)
-          console.log('AAAAAA', wall.assortment.name, '----', wall.quantity, '----', Panel.getWeight(wall.assortment.name))
           wallsSquare += Panel.getWeight(wall.assortment.name) * wall.quantity
         })
 
@@ -97,7 +95,6 @@ export class CustomerOrderController {
           'Проект': project.name || '-',
           'Примечание': ''
         }
-        console.log('SQUARE', { wallsSquare, roofsSquare, facingsSquare })
         if (wallsSquare || roofsSquare || facingsSquare) {
           data.push(orderData)
         }

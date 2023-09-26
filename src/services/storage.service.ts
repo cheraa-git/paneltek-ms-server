@@ -13,7 +13,6 @@ const getPathStorageFromUrl = (url: string) => {
 }
 export const storageService = {
   save: async (file: ExcelJS.Buffer, dirName: string, fileName: string) => {
-    console.log(file)
     try {
       const storageRef = ref(storage, `${dirName}/${Date.now()}${fileName}`)
       const uploadTask = await uploadBytes(storageRef, file)
@@ -28,7 +27,6 @@ export const storageService = {
     try {
       const storageImage = ref(storage, getPathStorageFromUrl(url))
       await deleteObject(storageImage)
-      console.log('image deleted')
     } catch (e) {
       console.log(e)
     }

@@ -32,7 +32,6 @@ export class Panel {
   static getDepth(productName: string) {
     const depthMatches = productName.match(/\(.+мм\)/g)
     if (depthMatches?.length !== 1) {
-      console.log(depthMatches)
       throw new Error(`${JSON.stringify(depthMatches)} depth matches incorrect. Length: ${depthMatches?.length}`)
     }
     const result = depthMatches[0].replace('(', '').replace(')', '').replace('мм', '')
