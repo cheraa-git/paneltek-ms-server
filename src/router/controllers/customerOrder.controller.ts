@@ -175,6 +175,16 @@ ${failedProcessings.map(p => `https://online.moysklad.ru/app/#processingorder/ed
       res.status(500).json({ message: error.message })
     }
   }
+  lockOrder = async (req: Request, res: Response) => {
+    const { orderId } = req.params
+    try {
+      const lockedOrder = await orderService.lock(orderId)
+      res.json(lockedOrder)
+    } catch (error: any) {
+      console.log(error)
+      res.status(500).json({ message: error.message })
+    }
+  }
 }
 
 

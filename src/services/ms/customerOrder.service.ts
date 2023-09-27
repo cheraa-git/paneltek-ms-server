@@ -2,6 +2,7 @@ import { msApi } from '../http.service'
 import { ServiceResponse } from '../../types/types'
 import { Order, OrderState, OrderStateName } from '../../types/order.types'
 import { OrderPositionWithAssortment } from '../../types/product.types'
+import { ADMIN_OWNER_META } from '../../constants/constants'
 
 class CustomerOrderService {
   getOrderAssortments = async (orderId: string): Promise<OrderPositionWithAssortment[]> => {
@@ -54,6 +55,11 @@ class CustomerOrderService {
     } catch (error) {
       return { error: { message: 'CustomerOrderService.setOrderState error', data: error } }
     }
+  }
+
+  lock = async (orderId: string): Promise<Order> => {
+    const { data } = await msApi.put(`/customerorder/${orderId}`, { owner: ADMIN_OWNER_META, shared: false })
+    return data
   }
 
 

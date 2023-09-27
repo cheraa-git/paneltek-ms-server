@@ -36,3 +36,12 @@ export const MATERIALS_STORE_META = {
   }
 }
 
+export const ADMIN_OWNER_META = {
+  'meta': {
+    'href': 'https://api.moysklad.ru/api/remap/1.2/entity/employee/974e800a-b2d1-11ed-0a80-005b00186f3a',
+    'metadataHref': 'https://api.moysklad.ru/api/remap/1.2/entity/employee/metadata',
+    'type': 'employee',
+    'mediaType': 'application/json',
+    'uuidHref': 'https://online.moysklad.ru/app/#employee/edit?id=974e800a-b2d1-11ed-0a80-005b00186f3a'
+  }
+}
