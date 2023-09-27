@@ -3,16 +3,21 @@ import { ProcessingPlan } from '../../types/processingPlan.types'
 import { ProcessingOrder } from '../../types/processingOrder.types'
 import { msApi } from '../http.service'
 import { isAxiosError } from 'axios'
+import { PROCESSING_ATTR_ORDER_NUMB_META } from '../../constants/order.constants'
 
 class ProcessingService {
-  create = async (processingPlan: ProcessingPlan, processingOrder: ProcessingOrder) => {
+  create = async (processingPlan: ProcessingPlan, processingOrder: ProcessingOrder, orderName: string) => {
     const payload = {
       organization: ORGANIZATION_META,
       productsStore: FINISHED_PRODUCT_STORE_META,
       materialsStore: MATERIALS_STORE_META,
       processingPlan,
       processingOrder,
-      quantity: processingOrder.quantity
+      quantity: processingOrder.quantity,
+      attributes: [{
+        ...PROCESSING_ATTR_ORDER_NUMB_META,
+        value: orderName
+      }]
     }
     try {
       if (processingOrder.processings?.length) {

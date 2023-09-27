@@ -35,3 +35,11 @@ export const ACTIVE_STATUSES = [
 ]
 
 export const RELEASE_STATUS_ATTR_ID = 'a2262c7f-d21f-11ed-0a80-012400380448'
+
+export const PROCESSING_ATTR_ORDER_NUMB_META = {
+  "meta": {
+    "href": "https://api.moysklad.ru/api/remap/1.2/entity/processing/metadata/attributes/9f04e4a9-5c94-11ee-0a80-067700174315",
+    "type": "attributemetadata",
+    "mediaType": "application/json"
+  },
+}
