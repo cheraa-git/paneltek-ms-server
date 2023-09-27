@@ -176,9 +176,10 @@ ${failedProcessings.map(p => `https://online.moysklad.ru/app/#processingorder/ed
     }
   }
   lockOrder = async (req: Request, res: Response) => {
-    const { orderId } = req.params
+    const { orderId } = req.query
+    if (!orderId) return res.status(400).json({ message: 'Query param `orderId` is required' })
     try {
-      const lockedOrder = await orderService.lock(orderId)
+      const lockedOrder = await orderService.lock(orderId as string)
       res.json(lockedOrder)
     } catch (error: any) {
       console.log(error)
