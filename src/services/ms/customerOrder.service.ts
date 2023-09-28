@@ -1,8 +1,8 @@
 import { msApi } from '../http.service'
-import { ServiceResponse } from '../../types/types'
 import { Order, OrderState, OrderStateName } from '../../types/order.types'
 import { OrderPositionWithAssortment } from '../../types/product.types'
 import { ADMIN_OWNER_META } from '../../constants/constants'
+import { COMPLETED_PRODUCE_ORDER_STATUS_ATTR } from '../../constants/order.constants'
 
 class CustomerOrderService {
   getOrderAssortments = async (orderId: string): Promise<OrderPositionWithAssortment[]> => {
@@ -23,17 +23,14 @@ class CustomerOrderService {
     })
     return data.rows
   }
-  getOrderStateDataByName = async (name: OrderStateName): ServiceResponse<OrderState> => {
-    try {
+  getOrderStateDataByName = async (name: OrderStateName): Promise<OrderState> => {
       const { data: { states } } = await msApi.get<{ states: OrderState[] }>('/customerorder/metadata/')
       const state = states.find(s => s.name === name)
       if (!state) {
-        return { error: { message: 'CustomerOrderService.getOrderStateDataByName: state not found', data: name } }
+        throw new Error(`CustomerOrderService.getOrderStateDataByName: state "${name}" not found`)
       }
-      return { data: state }
-    } catch (error) {
-      return { error: { message: 'CustomerOrderService.getOrderStateDataByName error', data: error } }
-    }
+    return state
+
   }
 
   getOrderByName = async (orderName: string): Promise<Order> => {
@@ -48,13 +45,9 @@ class CustomerOrderService {
     return orders[0]
   }
 
-  setOrderState = async (orderId: string, state: OrderState): ServiceResponse<Order> => {
-    try {
-      const { data } = await msApi.put(`/customerorder/${orderId}`, { state })
-      return { data }
-    } catch (error) {
-      return { error: { message: 'CustomerOrderService.setOrderState error', data: error } }
-    }
+  setOrderState = async (orderId: string, state: OrderState): Promise<Order> => {
+    const { data } = await msApi.put(`/customerorder/${orderId}`, { state })
+    return data
   }
 
   lock = async (orderId: string): Promise<Order> => {
@@ -62,6 +55,10 @@ class CustomerOrderService {
     return data
   }
 
+  completeProduceState = async (orderId: string): Promise<Order> => {
+    const { data } = await msApi.put(`/customerorder/${orderId}`, { attributes: [COMPLETED_PRODUCE_ORDER_STATUS_ATTR] })
+    return data
+  }
 
 }
 

@@ -10,6 +10,7 @@ import { processingOrderService } from '../../services/ms/processingOrder.servic
 import { OrderPositionWithAssortment } from '../../types/product.types'
 import { emailService } from '../../services/email.service'
 import { processingService } from '../../services/ms/processing.service'
+import { COMPLETED_PRODUCE_ORDER_STATUS_ATTR } from '../../constants/order.constants'
 
 export class CustomerOrderController {
   getCurrentOrders = async (req: Request, res: Response) => {
@@ -112,20 +113,9 @@ export class CustomerOrderController {
   setOrderState = async (req: Request, res: Response) => {
     try {
       const orderName = formatNumber(Number(req.body.orderName), 5)
-      const stateRes = await orderService.getOrderStateDataByName(req.body.stateName)
-      if (stateRes.error || !stateRes.data) {
-        return res.status(500).json({ ...stateRes.error })
-      }
-      const state = stateRes.data
-
+      const state = await orderService.getOrderStateDataByName(req.body.stateName)
       const order = await orderService.getOrderByName(orderName)
-
-      const updatedOrderRes = await orderService.setOrderState(order.id, state)
-      if (updatedOrderRes.error) return res.status(500).json({ ...updatedOrderRes.error })
-      const updatedOrder = updatedOrderRes.data
-      if (!updatedOrder || updatedOrder?.state?.meta?.href !== state.meta.href) {
-
-      }
+      const updatedOrder = await orderService.setOrderState(order.id, state)
       res.json(updatedOrder)
     } catch (error: any) {
       return res.status(500).json({ message: error.message })
@@ -138,6 +128,9 @@ export class CustomerOrderController {
       if (!orderName) return res.status(400).json({ message: 'param `orderName` is required' })
 
       const order = await orderService.getOrderByName(formatNumber(orderName, 5))
+      if (order.attributes?.find(attr => attr.meta.href === COMPLETED_PRODUCE_ORDER_STATUS_ATTR.meta.href)) {
+        return res.json({ processingOrders: 0, processings: 0 })
+      }
       const orderPositions = await orderService.getOrderAssortments(order.id)
 
       const groupedOrderPositions = orderPositions.reduce((acc, position) => {
@@ -180,8 +173,12 @@ export class CustomerOrderController {
 ${failedProcessings.map(p => `https://online.moysklad.ru/app/#processingorder/edit?id=${p.processingOrder.id}`).join('\n')}
         `
         await emailService.sendMessage(process.env.ADMIN_EMAIL || '', 'Ошибка техоперации', emailMessage)
+      } else {
+        await orderService.completeProduceState(order.id)
       }
-      res.json({ processingOrders: processingOrders.length, processings: processings.length, })
+
+
+      res.json({ processingOrders: processingOrders.length, processings: processings.length })
     } catch (error: any) {
       console.log(error)
       res.status(500).json({ message: error.message })

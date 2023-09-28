@@ -34,7 +34,6 @@ export const ACTIVE_STATUSES = [
   }
 ]
 
-export const RELEASE_STATUS_ATTR_ID = 'a2262c7f-d21f-11ed-0a80-012400380448'
 
 export const PROCESSING_ATTR_ORDER_NUMB_META = {
   "meta": {
@@ -42,4 +41,22 @@ export const PROCESSING_ATTR_ORDER_NUMB_META = {
     "type": "attributemetadata",
     "mediaType": "application/json"
   },
+}
+
+
+export const COMPLETED_PRODUCE_ORDER_STATUS_ATTR = {
+  meta: {
+    'href': 'https://api.moysklad.ru/api/remap/1.2/entity/customerorder/metadata/attributes/a2262c7f-d21f-11ed-0a80-012400380448',
+    'type': 'attributemetadata',
+    'mediaType': 'application/json'
+  },
+  value: {
+    'meta': {
+      'href': 'https://api.moysklad.ru/api/remap/1.2/entity/customentity/90d570fd-d21f-11ed-0a80-0f0a0037da9c/17b48f8b-5c76-11ee-0a80-054d00144e19',
+      'metadataHref': 'https://api.moysklad.ru/api/remap/1.2/context/companysettings/metadata/customEntities/90d570fd-d21f-11ed-0a80-0f0a0037da9c',
+      'type': 'customentity',
+      'mediaType': 'application/json',
+      'uuidHref': 'https://online.moysklad.ru/app/#custom_90d570fd-d21f-11ed-0a80-0f0a0037da9c/edit?id=17b48f8b-5c76-11ee-0a80-054d00144e19'
+    }
+  }
 }
