@@ -140,10 +140,22 @@ export class CustomerOrderController {
       const order = await orderService.getOrderByName(formatNumber(orderName, 5))
       const orderPositions = await orderService.getOrderAssortments(order.id)
 
+      const groupedOrderPositions = orderPositions.reduce((acc, position) => {
+        const existingPositionIndex = acc.findIndex(p => {
+          return p.assortment.name === position.assortment.name
+        })
+        if (existingPositionIndex >= 0) {
+          acc[existingPositionIndex].quantity += position.quantity
+        } else {
+          acc.push(position)
+        }
+        return acc
+      }, [] as OrderPositionWithAssortment[])
+
       const processingOrders = []
       const processings = []
       const failedProcessings = []
-      for (const position of orderPositions) {
+      for (const position of groupedOrderPositions) {
         let processingPlan: ProcessingPlan | undefined
         if (Panel.isPanel(position.assortment.name)) {
           processingPlan = (await processingPlanService.createPanelProcessingPlan(position.assortment)).processingPlan
@@ -177,7 +189,6 @@ ${failedProcessings.map(p => `https://online.moysklad.ru/app/#processingorder/ed
   }
   lockOrder = async (req: Request, res: Response) => {
     const { orderId } = req.query
-    console.log(`Lock order ${orderId}`)
     if (!orderId) return res.status(400).json({ message: 'Query param `orderId` is required' })
     try {
       const lockedOrder = await orderService.lock(orderId as string)
