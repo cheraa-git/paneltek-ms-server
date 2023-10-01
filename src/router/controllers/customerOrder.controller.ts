@@ -122,7 +122,7 @@ export class CustomerOrderController {
     }
   }
 
-  runOrder = async (req: Request, res: Response) => {
+  produceOrder = async (req: Request, res: Response) => {
     try {
       const { orderName } = req.body
       if (!orderName) return res.status(400).json({ message: 'param `orderName` is required' })
@@ -177,7 +177,7 @@ ${failedProcessings.map(p => `https://online.moysklad.ru/app/#processingorder/ed
         await orderService.completeProduceState(order.id)
       }
 
-
+      console.log(`PRODUCE: order - ${orderName}; processingOrders - ${processingOrders.length}; processings - ${processings.length}`)
       res.json({ processingOrders: processingOrders.length, processings: processings.length })
     } catch (error: any) {
       console.log(error)
