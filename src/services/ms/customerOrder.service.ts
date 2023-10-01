@@ -45,6 +45,11 @@ class CustomerOrderService {
     return orders[0]
   }
 
+  getById = async (orderId: string): Promise<Order> => {
+    const { data } = await msApi.get(`/customerorder/${orderId}`)
+    return data
+  }
+
   setOrderState = async (orderId: string, state: OrderState): Promise<Order> => {
     const { data } = await msApi.put(`/customerorder/${orderId}`, { state })
     return data

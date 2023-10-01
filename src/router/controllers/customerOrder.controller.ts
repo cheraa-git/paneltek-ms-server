@@ -195,6 +195,16 @@ ${failedProcessings.map(p => `https://online.moysklad.ru/app/#processingorder/ed
       res.status(500).json({ message: error.message })
     }
   }
+
+  getOrderById = async (req: Request, res: Response) => {
+    const { orderId } = req.params
+    try {
+      const order = await orderService.getById(orderId)
+      res.json(order)
+    } catch (error) {
+
+    }
+  }
 }
 
 
