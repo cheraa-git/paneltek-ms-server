@@ -39,8 +39,6 @@ export class CustomerOrderController {
         })
 
         const wallsWidth: string[] = []
-        // const wallsColorAndFiller: string[] = []
-        // let wallsSquare = 0
         const wallsData: { [colorAndFiller: string]: { colorAndFiller: string, square: number } } = {}
         walls.forEach(wall => {
           const width = Panel.getWidth(wall.assortment.name)
@@ -50,17 +48,13 @@ export class CustomerOrderController {
           const square = Panel.getWeight(wall.assortment.name) * wall.quantity
 
           if (!wallsWidth.includes(width)) wallsWidth.push(width)
-          // if (!wallsColorAndFiller.includes(wallColorAndFiller)) wallsColorAndFiller.push(wallColorAndFiller)
           if (wallColorAndFiller in wallsData) {
             wallsData[wallColorAndFiller].square += square
           } else {
             wallsData[wallColorAndFiller] = { colorAndFiller: wallColorAndFiller, square }
           }
-          // wallsSquare += square
         })
 
-        // const roofsColorAndFiller: string[] = []
-        // let roofsSquare = 0
         const roofsData: { [colorAndFiller: string]: { colorAndFiller: string, square: number } } = {}
         roofs.forEach(roof => {
           let color = roof.assortment.characteristics?.find(c => c.name === 'цвет')?.value
@@ -68,17 +62,14 @@ export class CustomerOrderController {
           const roofColorAndFiller = `${color} ${Panel.getFiller(roof.assortment.name)}`
           const square = Panel.getWeight(roof.assortment.name) * roof.quantity
 
-          // if (!roofsColorAndFiller.includes(roofColorAndFiller)) roofsColorAndFiller.push(roofColorAndFiller)
           if (roofColorAndFiller in roofsData) {
             roofsData[roofColorAndFiller].square += square
           } else {
             roofsData[roofColorAndFiller] = { colorAndFiller: roofColorAndFiller, square }
           }
 
-          // roofsSquare += Panel.getWeight(roof.assortment.name) * roof.quantity
         })
 
-        // let facingsSquare = 0
         const facingsData: { [color: string]: { color: string, square: number } } = {}
         facings.forEach(facing => {
           const color = facing.assortment.characteristics?.find(c => c.name === 'цвет')?.value
@@ -90,7 +81,6 @@ export class CustomerOrderController {
           } else {
             facingsData[color] = { color, square }
           }
-          // facingsSquare += Facing.getWeight(facing.assortment.name) * facing.quantity
         })
 
         const roofingSheetsData: { [color: string]: { color: string, square: number } } = {}
@@ -126,10 +116,8 @@ export class CustomerOrderController {
           'Контрагент': agent?.name || agent?.legalTitle || '-',
           'Текущий статус': '',
           'Стена и ширина': walls.length ? `Стена ${wallsWidth.join('/')}` : '-',
-          // 'Цвет, наполнение, Толщина': wallsColorAndFiller.join('/') || '-',
           'Цвет, наполнение, Толщина': Object.values(wallsData).map(d => d.colorAndFiller).join(' – ') || '-',
           'Площадь стен': wallsSquare,
-          // 'Кровля цвет наполнение толщина': roofs.length ? `Кровля ${roofsColorAndFiller.join('/')}` : '-',
           'Кровля цвет наполнение толщина': Object.values(roofsData).map(d => d.colorAndFiller).join(' – ') || '-',
           'Площадь кровли': roofsSquare,
           'Ф (цвет)': Object.values(facingsData).map(d => d.color).join(' – ') || '-',
@@ -137,10 +125,10 @@ export class CustomerOrderController {
           'Обкладка цвет': Object.values(roofingSheetsData).map(d => d.color).join(' – ') || '-',
           'Обкладка (м2)': roofingSheetsSquare,
           'Проект': project.name || '-',
-          'Sw': Object.values(wallsData).map(d => d.square).join(' – ') || '-',
-          'Sr': Object.values(roofsData).map(d => d.square).join(' – ') || '-',
-          'Sf': Object.values(facingsData).map(d => d.square).join(' – ') || '-',
-          'Srs': Object.values(roofingSheetsData).map(d => d.square).join(' – ') || '-'
+          'Sw': Object.values(wallsData).map(d => d.square.toFixed(2)).join(' – '),
+          'Sr': Object.values(roofsData).map(d => d.square.toFixed(2)).join(' – '),
+          'Sf': Object.values(facingsData).map(d => d.square.toFixed(2)).join(' – '),
+          'Srs': Object.values(roofingSheetsData).map(d => d.square.toFixed(2)).join(' – ')
         }
         if (wallsSquare || roofsSquare || facingsSquare || roofingSheetsSquare) {
           data.push(orderData)
