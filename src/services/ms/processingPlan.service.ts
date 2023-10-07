@@ -17,12 +17,6 @@ import { Modification } from '../../types/product.types'
 import { RoofingSheet } from '../../utils/roofingSheet'
 
 
-type  CreateProcessingPlanRes = Promise<{
-  name: string,
-  status: 'archived' | 'exists' | 'created',
-  processingPlan?: ProcessingPlan
-}>
-
 class ProcessingPlanService {
   private getProcessingPlanGroup = (productType: string) => {
     if (productType === 'стеновая ППС' || productType === 'стеновая МВ') {
