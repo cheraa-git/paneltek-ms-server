@@ -4,7 +4,6 @@ import { msApi } from '../../services/http.service'
 import { Facing } from '../../utils/facing'
 import { Panel } from '../../utils/panel'
 import { formatNumber } from '../../utils/utils'
-import { ProcessingPlan } from '../../types/processingPlan.types'
 import { processingPlanService } from '../../services/ms/processingPlan.service'
 import { processingOrderService } from '../../services/ms/processingOrder.service'
 import { OrderPositionWithAssortment } from '../../types/product.types'
@@ -149,12 +148,7 @@ export class CustomerOrderController {
       const processings = []
       const failedProcessings = []
       for (const position of groupedOrderPositions) {
-        let processingPlan: ProcessingPlan | undefined
-        if (Panel.isPanel(position.assortment.name)) {
-          processingPlan = (await processingPlanService.createPanelProcessingPlan(position.assortment)).processingPlan
-        } else if (Facing.isFacing(position.assortment.name)) {
-          processingPlan = (await processingPlanService.createFacingProcessingPlan(position.assortment)).processingPlan
-        }
+        const processingPlan = await processingPlanService.createProcessingPlan(position.assortment)
         if (processingPlan) {
           const processingOrder = await processingOrderService.create(processingPlan, position.quantity, order.name)
           processingOrders.push(processingOrder)
@@ -201,8 +195,9 @@ ${failedProcessings.map(p => `https://online.moysklad.ru/app/#processingorder/ed
     try {
       const order = await orderService.getById(orderId)
       res.json(order)
-    } catch (error) {
-
+    } catch (error: any) {
+      console.log(error)
+      res.status(500).json({ message: error.message })
     }
   }
 }

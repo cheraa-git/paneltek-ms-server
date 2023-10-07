@@ -8,4 +8,5 @@ customerOrderRouter.post('/current_orders', controller.getCurrentOrders)
 customerOrderRouter.post('/state', controller.setOrderState)
 customerOrderRouter.post('/produce', controller.produceOrder)
 customerOrderRouter.post('/lock', controller.lockOrder)
+
 customerOrderRouter.get('/:orderId', controller.getOrderById)

@@ -25,4 +25,13 @@ export const PROCESSING_PLAN_GROUP_FACING = {
   }
 }
 
+export const PROCESSING_PLAN_GROUP_ROOFING_SHEET = {
+  'meta': {
+    'href': 'https://api.moysklad.ru/api/remap/1.2/entity/processingplanfolder/60f58d75-d069-11ec-0a80-022900a448c3',
+    'metadataHref': 'https://api.moysklad.ru/api/remap/1.2/entity/processingplanfolder/metadata',
+    'type': 'processingplanfolder',
+    'mediaType': 'application/json'
+  }
+}
+
 export const DEFAULT_METAL_THICKNESS = '0.45'

@@ -2,6 +2,7 @@ import {
   DEFAULT_METAL_THICKNESS,
   PROCESSING_PLAN_GROUP_FACING,
   PROCESSING_PLAN_GROUP_ROOF,
+  PROCESSING_PLAN_GROUP_ROOFING_SHEET,
   PROCESSING_PLAN_GROUP_WALL
 } from '../../constants/processingPlan.constants'
 import { msApi } from '../http.service'
@@ -13,6 +14,7 @@ import { ProcessingPlan } from '../../types/processingPlan.types'
 import { Panel } from '../../utils/panel'
 import { PanelCalculator } from '../../utils/panelCalculator'
 import { Modification } from '../../types/product.types'
+import { RoofingSheet } from '../../utils/roofingSheet'
 
 
 type  CreateProcessingPlanRes = Promise<{
@@ -39,12 +41,11 @@ class ProcessingPlanService {
     return data.rows.find((p) => p.name === name)
   }
 
-  createFacingProcessingPlan = async (modification: Modification): CreateProcessingPlanRes => {
-    if (modification.archived) return { name: modification.name, status: 'archived' }
+  createFacingProcessingPlan = async (modification: Modification): Promise<ProcessingPlan | null> => {
+    if (modification.archived) return null
     const existingProcessingPlan = await this.getProcessingPlanByName(modification.name)
-    if (existingProcessingPlan) {
-      return { name: modification.name, status: 'exists', processingPlan: existingProcessingPlan }
-    }
+    if (existingProcessingPlan) return existingProcessingPlan
+
     const facingName = modification.name
     const facing = new Facing(facingName)
     const metalCode = msCodeService.getMetal(facing.color, DEFAULT_METAL_THICKNESS, '1200')
@@ -67,20 +68,15 @@ class ProcessingPlanService {
       cost: (facing.weight * 120) * 100
     }
     const { data: processingPlan } = await msApi.post('/processingplan', processingPlanData)
-    return { name: modification.name, status: 'created', processingPlan }
+    return processingPlan
   }
 
-  createPanelProcessingPlan = async (modification: Modification): CreateProcessingPlanRes => {
-    if (modification.archived) {
-      return { name: modification.name, status: 'archived' }
-    }
+  createPanelProcessingPlan = async (modification: Modification): Promise<ProcessingPlan | null> => {
+    if (modification.archived) return null
     const existingProcessingPlan = await this.getProcessingPlanByName(modification.name)
-    if (existingProcessingPlan) {
-      return { name: modification.name, status: 'exists', processingPlan: existingProcessingPlan }
-    }
+    if (existingProcessingPlan) return existingProcessingPlan
 
     const panelName = modification.name
-
     const panel = new Panel(panelName)
     const topMetalCode = msCodeService.getMetal(panel.colors[0], DEFAULT_METAL_THICKNESS, panel.isWall ? panel.width : '1200')
     const bottomMetalCode = msCodeService.getMetal(panel.colors[1], DEFAULT_METAL_THICKNESS, panel.width)
@@ -119,7 +115,48 @@ class ProcessingPlanService {
       cost: (panel.weight * 200) * 100
     }
     const { data: processingPlan } = await msApi.post('/processingplan', processingPlanData)
-    return { name: modification.name, status: 'created', processingPlan }
+    return processingPlan
+  }
+
+  createRoofingSheetProcessingPlan = async (modification: Modification): Promise<ProcessingPlan | null> => {
+    if (modification.archived) return null
+    const existingProcessingPlan = await this.getProcessingPlanByName(modification.name)
+    if (existingProcessingPlan) return existingProcessingPlan
+
+    const roofingSheet = new RoofingSheet(modification.name)
+    const metalCode = msCodeService.getMetal(roofingSheet.color, DEFAULT_METAL_THICKNESS, '1200')
+    const materials = [ // TODO: уточнить формулы расчета метала и пленки для кровельной обкладки
+      { // МЕТАЛЛ
+        assortment: await productService.searchOneProductByCode(metalCode),
+        quantity: roofingSheet.weight * 3.6 / 1000
+      },
+      { // ПЛЕНКА
+        assortment: await productService.getProductById(TAPE_ID),
+        quantity: roofingSheet.weight
+      }
+    ]
+
+    const processingPlanData = {
+      name: modification.name,
+      products: [{ assortment: modification, quantity: 1 }],
+      materials,
+      parent: PROCESSING_PLAN_GROUP_ROOFING_SHEET,
+      cost: (roofingSheet.weight * 120) * 100 // TODO: уточнить правильность производственных расходов
+    }
+    const { data: processingPlan } = await msApi.post('/processingplan', processingPlanData)
+    return processingPlan
+  }
+
+  createProcessingPlan = async (modification: Modification): Promise<ProcessingPlan | null> => {
+    let processingPlan: ProcessingPlan | null = null
+    if (Panel.isPanel(modification.name)) {
+      processingPlan = await processingPlanService.createPanelProcessingPlan(modification)
+    } else if (Facing.isFacing(modification.name)) {
+      processingPlan = await processingPlanService.createFacingProcessingPlan(modification)
+    } else if (RoofingSheet.isRoofingSheet(modification.name)) {
+      processingPlan = await this.createRoofingSheetProcessingPlan(modification)
+    }
+    return processingPlan
   }
 }
 
