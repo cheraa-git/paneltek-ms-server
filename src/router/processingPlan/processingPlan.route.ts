@@ -1,4 +1,4 @@
-import { ProcessingPlanController } from '../controllers/processingPlan.controller'
+import { ProcessingPlanController } from './processingPlan.controller'
 import { Router } from 'express'
 
 const controller = new ProcessingPlanController()

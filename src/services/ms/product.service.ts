@@ -1,13 +1,14 @@
 import { msApi } from '../http.service'
+import { Assortment } from '../../types/product.types'
 
 class ProductService {
-  getProductById = async (productId: string) => {
+  getById = async (productId: string) => {
     const url = `/product/${productId}`
     const { data } = await msApi.get(url)
     return data
   }
 
-  searchOneProductByCode = async (code: string) => {
+  searchOneByCode = async (code: string) => {
     const url = `/product?search=${encodeURIComponent(code)}`
     const { data } = await msApi.get(url)
     const rows = data.rows.filter((product: any) => product.code === code)
@@ -18,6 +19,13 @@ class ProductService {
     }
     return rows[0]
   }
+
+  getAssortmentByCode = async (code: string): Promise<Assortment | undefined> => {
+    const url = `/assortment?filter=code=${encodeURIComponent(code)}`
+    const { data } = await msApi.get(url)
+    return data.rows.find((a: Assortment) => a.code === code)
+  }
+
 }
 
 export const productService = new ProductService()

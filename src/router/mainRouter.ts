@@ -1,17 +1,15 @@
 import { Express } from 'express'
-import { reportRouter } from './routes/report.route'
-import { templateRouter } from './routes/template.route'
-import { customerOrderRouter } from './routes/customerOrder.route'
-import { processingPlanRouter } from './routes/processingPlan.route'
+import { customerOrderRouter } from './customerOrder/customerOrder.route'
+import { processingPlanRouter } from './processingPlan/processingPlan.route'
+import { productRouter } from './product/product.route'
 
 export class MainRouter {
   constructor(private app: Express) {
   }
 
   useRoutes() {
-    this.app.use('/reports', reportRouter)
-    this.app.use('/template', templateRouter)
     this.app.use('/customer_order', customerOrderRouter)
     this.app.use('/processing_plan', processingPlanRouter)
+    this.app.use('/product', productRouter)
   }
 }

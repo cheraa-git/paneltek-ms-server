@@ -1,4 +1,4 @@
-import { CustomerOrderController } from '../controllers/customerOrder.controller'
+import { CustomerOrderController } from './customerOrder.controller'
 import { Router } from 'express'
 
 const controller = new CustomerOrderController()

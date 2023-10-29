@@ -20,6 +20,10 @@ export interface Modification {
   product: { meta: Meta }
 }
 
+export interface Assortment extends Modification {
+  stock: number,
+}
+
 export interface OrderPositionWithAssortment {
   meta: Meta,
   id: string
@@ -29,7 +33,7 @@ export interface OrderPositionWithAssortment {
   discount: number
   vat: number
   vatEnabled: boolean
-  assortment: Modification
+  assortment: Assortment
   shipped: number
   reserve: number
 }

@@ -45,11 +45,11 @@ class ProcessingPlanService {
     const metalCode = msCodeService.getMetal(facing.color, DEFAULT_METAL_THICKNESS, '1200')
     const materials = [
       { // МЕТАЛЛ
-        assortment: await productService.searchOneProductByCode(metalCode),
+        assortment: await productService.searchOneByCode(metalCode),
         quantity: facing.weight * 3.6 / 1000
       },
       { // ПЛЕНКА
-        assortment: await productService.getProductById(TAPE_ID),
+        assortment: await productService.getById(TAPE_ID),
         quantity: facing.weight
       }
     ]
@@ -76,23 +76,23 @@ class ProcessingPlanService {
     const bottomMetalCode = msCodeService.getMetal(panel.colors[1], DEFAULT_METAL_THICKNESS, panel.width)
     const materials = [
       { // ВЕРХНИЙ ЛИСТ МЕТАЛЛА
-        assortment: await productService.searchOneProductByCode(topMetalCode),
+        assortment: await productService.searchOneByCode(topMetalCode),
         quantity: PanelCalculator.getMetal(panel.type, panel.weight).top
       },
       { // НИЖНИЙ ЛИСТ МЕТАЛЛА
-        assortment: await productService.searchOneProductByCode(bottomMetalCode),
+        assortment: await productService.searchOneByCode(bottomMetalCode),
         quantity: PanelCalculator.getMetal(panel.type, panel.weight).bottom
       },
       { // ПЛЕНКА
-        assortment: await productService.getProductById(TAPE_ID),
+        assortment: await productService.getById(TAPE_ID),
         quantity: PanelCalculator.getTape(panel.type, panel.width, panel.weight)
       },
       { // КЛЕЙ
-        assortment: await productService.getProductById(GLUE_ID),
+        assortment: await productService.getById(GLUE_ID),
         quantity: PanelCalculator.getGlue(panel.name, panel.weight)
       },
       { // УТЕПЛИТЕЛЬ
-        assortment: await productService.searchOneProductByCode(msCodeService.getFiller(panelName)),
+        assortment: await productService.searchOneByCode(msCodeService.getFiller(panelName)),
         quantity: PanelCalculator.getFiller(panel.type, panel.width, panel.depth, panel.weight)
       }
     ]
@@ -121,11 +121,11 @@ class ProcessingPlanService {
     const metalCode = msCodeService.getMetal(roofingSheet.color, DEFAULT_METAL_THICKNESS, '1200')
     const materials = [ // TODO: уточнить формулы расчета метала и пленки для кровельной обкладки
       { // МЕТАЛЛ
-        assortment: await productService.searchOneProductByCode(metalCode),
-        quantity: roofingSheet.weight * 3.6 / 1000
+        assortment: await productService.searchOneByCode(metalCode),
+        quantity: roofingSheet.weight * 3.63 / 1000
       },
       { // ПЛЕНКА
-        assortment: await productService.getProductById(TAPE_ID),
+        assortment: await productService.getById(TAPE_ID),
         quantity: roofingSheet.weight
       }
     ]
@@ -135,7 +135,7 @@ class ProcessingPlanService {
       products: [{ assortment: modification, quantity: 1 }],
       materials,
       parent: PROCESSING_PLAN_GROUP_ROOFING_SHEET,
-      cost: (roofingSheet.weight * 120) * 100 // TODO: уточнить правильность производственных расходов
+      cost: (roofingSheet.weight * 100) * 100
     }
     const { data: processingPlan } = await msApi.post('/processingplan', processingPlanData)
     return processingPlan
